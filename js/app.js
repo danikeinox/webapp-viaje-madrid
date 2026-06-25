@@ -124,9 +124,13 @@ function locationButton(name, url) {
   return mapsButton(name, url, '📍 ¿Dónde estoy?', 'location');
 }
 
-function phoneButton(name, phone) {
+function phoneButton(name, phone, label = '📞 Llamar para reservar') {
   if (!phone) return '';
-  return `<button class="btn btn-phone" data-action="phone" data-phone="${escapeHtml(phone)}" data-name="${escapeHtml(name)}">📞 Llamar para reservar</button>`;
+  return `<button class="btn btn-phone" data-action="phone" data-phone="${escapeHtml(phone)}" data-name="${escapeHtml(name)}">${label}</button>`;
+}
+
+function hotelMapsUrl(h) {
+  return h.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.mapsQuery)}`;
 }
 
 function renderIda() {
@@ -179,10 +183,10 @@ function renderIda() {
     <div class="card">
       <h3 class="card-title"><span class="card-step-number">6</span> Ir al hotel</h3>
       <p class="card-text">Dejad las maletas en el hotel. Si llegáis antes de la hora de entrada, la recepción suele guardarlas.</p>
-      <p class="card-text"><strong>Hotel:</strong> ${escapeHtml(TRIP.hotel.name)}</p>
+      <p class="card-text"><strong>Hostal:</strong> ${escapeHtml(TRIP.hotel.name)}</p>
       <p class="card-text"><strong>Dirección:</strong> ${escapeHtml(TRIP.hotel.address)}</p>
-      ${TRIP.hotel.phone ? phoneButton(TRIP.hotel.name, TRIP.hotel.phone) : ''}
-      ${mapsButton(TRIP.hotel.name, `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(TRIP.hotel.mapsQuery)}`)}
+      ${TRIP.hotel.phone ? phoneButton(TRIP.hotel.name, TRIP.hotel.phone, '📞 Llamar al hostal') : ''}
+      ${mapsButton(TRIP.hotel.name, hotelMapsUrl(TRIP.hotel))}
     </div>
 
     <div class="btn-group">
@@ -195,23 +199,24 @@ function renderIda() {
 function renderHotel() {
   const h = TRIP.hotel;
   return `
-    <h2 class="section-title">🏨 Hotel</h2>
-    <p class="section-intro">Vuestra base en Madrid — 3 noches</p>
+    <h2 class="section-title">🏨 Hostal</h2>
+    <p class="section-intro">Hostal Madrid — 3 noches en pleno centro</p>
 
     <div class="card card-highlight">
       <h3 class="card-title">${escapeHtml(h.name)}</h3>
       <p class="card-text"><strong>📍 Dirección:</strong> ${escapeHtml(h.address)}</p>
+      <p class="card-text"><strong>📞 Teléfono:</strong> 915 22 00 60</p>
       <p class="card-text"><strong>📅 Entrada:</strong> ${escapeHtml(h.checkIn)}</p>
       <p class="card-text"><strong>📅 Salida:</strong> ${escapeHtml(h.checkOut)} (jueves 16)</p>
       <p class="card-note">${escapeHtml(h.notes)}</p>
       <div class="btn-group">
-        ${mapsButton(h.name, `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.mapsQuery)}`)}
-        ${h.phone ? phoneButton(h.name, h.phone) : ''}
+        ${mapsButton(h.name, hotelMapsUrl(h))}
+        ${h.phone ? phoneButton(h.name, h.phone, '📞 Llamar al hostal') : ''}
       </div>
     </div>
 
     <div class="card">
-      <h3 class="card-title">Del hotel a Atocha (para la vuelta)</h3>
+      <h3 class="card-title">Del hostal a Atocha (para la vuelta)</h3>
       <p class="card-text">El jueves 16, salid del hotel con tiempo para llegar a Atocha con margen antes del tren.</p>
       <p class="card-warning">⏰ Calculad 45-60 minutos desde el hotel hasta estar en el andén de Atocha.</p>
       ${mapsButton('Madrid Atocha', TRIP.locations.atocha.mapsUrl)}
@@ -219,12 +224,13 @@ function renderHotel() {
     </div>
 
     <div class="card">
-      <h3 class="card-title">Consejos del hotel</h3>
+      <h3 class="card-title">Consejos del hostal</h3>
       <ul class="help-list">
-        <li><strong>Recepción</strong>Preguntad ahí cualquier duda: taxis, restaurantes cercanos, mapas.</li>
+        <li><strong>Recepción</strong>El personal os orientará sobre dónde comer, visitar y cómo moveros por el centro.</li>
+        <li><strong>Ubicación</strong>Estáis entre Puerta del Sol y Plaza Mayor, lo más céntrico de Madrid.</li>
         <li><strong>WiFi</strong>Pedid la contraseña del WiFi al llegar.</li>
-        <li><strong>Desayuno</strong>Si el hotel incluye desayuno, preguntad el horario.</li>
-        <li><strong>Caja fuerte (opcional)</strong>Guardad documentos y objetos de valor si el hotel dispone de ella.</li>
+        <li><strong>Lavandería</strong>El hostal dispone de lavandería para huéspedes — preguntad en recepción.</li>
+        <li><strong>Caja fuerte (opcional)</strong>Guardad documentos y objetos de valor si el hostal dispone de ella.</li>
       </ul>
     </div>
   `;

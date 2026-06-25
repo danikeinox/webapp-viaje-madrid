@@ -19,13 +19,15 @@ export const TRIP = {
   },
 
   hotel: {
-    name: 'PENDIENTE — nombre del hotel',
-    address: 'PENDIENTE — dirección del hotel',
-    phone: '',
-    checkIn: 'Desde las 14:00 (habitual)',
-    checkOut: 'Antes de las 12:00 (habitual)',
-    notes: 'Cuando sepáis el hotel, actualizad esta app. Podéis dejar la maleta en recepción si llegáis antes de la hora de entrada.',
-    mapsQuery: 'hoteles centro Madrid',
+    name: 'Hostal Madrid',
+    address: 'Calle Esparteros, 6, 28012 Madrid',
+    phone: '915220060',
+    website: 'https://www.hostal-madrid.info/',
+    checkIn: 'Desde las 14:00 (entrada anticipada bajo disponibilidad)',
+    checkOut: 'Antes de las 12:00',
+    notes: 'Hostal en pleno centro, entre Puerta del Sol y Plaza Mayor. Edificio histórico del siglo XIX. El personal os orientará sobre dónde comer y qué visitar. Si llegáis antes de la hora de entrada, preguntad en recepción por guardar las maletas.',
+    mapsQuery: 'Hostal Madrid Esparteros 6 Madrid',
+    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Hostal+Madrid+Esparteros+6+Madrid',
   },
 
   locations: {
