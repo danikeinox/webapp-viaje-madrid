@@ -1,0 +1,482 @@
+/* Viaje Madrid — Estilos accesibles para personas mayores */
+
+:root {
+  --color-primary: #8B1A1A;
+  --color-primary-dark: #6B1212;
+  --color-secondary: #C4A35A;
+  --color-bg: #FFF8F0;
+  --color-surface: #FFFFFF;
+  --color-text: #1A1A1A;
+  --color-text-muted: #555555;
+  --color-border: #E0D5C5;
+  --color-success: #2D6A4F;
+  --color-warning: #B45309;
+  --color-info: #1D4E89;
+  --font-base: 20px;
+  --font-large: 24px;
+  --font-xl: 28px;
+  --font-title: 32px;
+  --radius: 16px;
+  --shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --nav-height: 88px;
+  --header-height: 100px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: var(--font-base);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Header */
+.app-header {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  text-align: center;
+  padding: 20px 16px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: var(--shadow);
+}
+
+.app-title {
+  font-size: var(--font-title);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.app-subtitle {
+  font-size: var(--font-large);
+  opacity: 0.95;
+  margin-top: 4px;
+}
+
+.offline-badge {
+  display: inline-block;
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 16px;
+}
+
+/* Main content */
+.main-content {
+  flex: 1;
+  padding: 16px 16px calc(var(--nav-height) + var(--safe-bottom) + 16px);
+  overflow-y: auto;
+}
+
+/* Section titles */
+.section-title {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+}
+
+.section-intro {
+  font-size: var(--font-base);
+  color: var(--color-text-muted);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+/* Cards */
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  border: 2px solid var(--color-border);
+}
+
+.card-highlight {
+  border-color: var(--color-secondary);
+  background: #FFFBF5;
+}
+
+.card-title {
+  font-size: var(--font-large);
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--color-primary);
+  color: white;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.card-text {
+  font-size: var(--font-base);
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.card-time {
+  display: inline-block;
+  background: var(--color-secondary);
+  color: var(--color-text);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: var(--font-large);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.card-time.pending {
+  background: #FEF3C7;
+  color: var(--color-warning);
+  border: 2px dashed var(--color-warning);
+}
+
+.card-note {
+  background: #EFF6FF;
+  border-left: 4px solid var(--color-info);
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  font-size: 18px;
+  margin: 12px 0;
+  line-height: 1.5;
+}
+
+.card-warning {
+  background: #FEF3C7;
+  border-left: 4px solid var(--color-warning);
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  font-size: 18px;
+  margin: 12px 0;
+}
+
+/* Buttons */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 18px 20px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: var(--font-large);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.1s, opacity 0.1s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 60px;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-large {
+  min-height: 64px;
+  font-size: var(--font-large);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  background: var(--color-primary-dark);
+}
+
+.btn-secondary {
+  background: #E8E0D5;
+  color: var(--color-text);
+}
+
+.btn-maps {
+  background: #4285F4;
+  color: white;
+  margin-top: 8px;
+}
+
+.btn-phone {
+  background: var(--color-success);
+  color: white;
+  margin-top: 8px;
+}
+
+.btn-taxi {
+  background: #FBBF24;
+  color: var(--color-text);
+  margin-top: 8px;
+}
+
+.btn-help {
+  background: var(--color-info);
+  color: white;
+  margin-top: 8px;
+}
+
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* Day tabs */
+.day-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.day-tab {
+  flex: 1;
+  min-width: 80px;
+  padding: 14px 8px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  touch-action: manipulation;
+}
+
+.day-tab.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+/* Place cards */
+.place-card .place-type {
+  font-size: 16px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+/* Bottom navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
+  height: calc(var(--nav-height) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: var(--color-surface);
+  border-top: 3px solid var(--color-border);
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  z-index: 100;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 8px 4px;
+  color: var(--color-text-muted);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s;
+}
+
+.nav-btn.active {
+  color: var(--color-primary);
+}
+
+.nav-btn.active .nav-icon {
+  transform: scale(1.15);
+}
+
+.nav-icon {
+  font-size: 28px;
+  line-height: 1;
+  transition: transform 0.15s;
+}
+
+.nav-label {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.modal-box {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.modal-box-wide {
+  max-width: 480px;
+}
+
+.modal-title {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  margin-bottom: 16px;
+  text-align: center;
+  color: var(--color-primary);
+}
+
+.modal-message {
+  font-size: var(--font-large);
+  text-align: center;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Help content in modal */
+.help-list {
+  text-align: left;
+  list-style: none;
+  margin: 16px 0;
+}
+
+.help-list li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-base);
+  line-height: 1.5;
+}
+
+.help-list li:last-child {
+  border-bottom: none;
+}
+
+.help-list strong {
+  display: block;
+  font-size: var(--font-large);
+  margin-bottom: 4px;
+}
+
+/* Install banner */
+.install-banner {
+  background: linear-gradient(135deg, #1D4E89, #2563EB);
+  color: white;
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.install-banner p {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.install-banner .btn {
+  background: white;
+  color: #1D4E89;
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.main-content > * {
+  animation: fadeIn 0.25s ease-out;
+}
+
+/* Responsive tweaks */
+@media (min-width: 400px) {
+  .nav-label {
+    font-size: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-content > * {
+    animation: none;
+  }
+  .btn:active {
+    transform: none;
+  }
+}

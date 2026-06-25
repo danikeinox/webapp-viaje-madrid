@@ -1,0 +1,37 @@
+{
+  "packageId": "com.viajemadrid.padres",
+  "name": "Viaje Madrid Papás",
+  "launcherName": "Madrid Papás",
+  "display": "standalone",
+  "themeColor": "#8B1A1A",
+  "navigationColor": "#8B1A1A",
+  "backgroundColor": "#FFF8F0",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://TU-DOMINIO.vercel.app/icons/icon-512.png",
+  "maskableIconUrl": "https://TU-DOMINIO.vercel.app/icons/icon-512.png",
+  "monochromeIconUrl": "https://TU-DOMINIO.vercel.app/icons/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "viajemadrid"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "orientation": "portrait",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "displayOverride": [],
+  "appVersion": "1.0.0"
+}
