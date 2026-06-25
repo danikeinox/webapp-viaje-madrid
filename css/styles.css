@@ -48,9 +48,10 @@ body {
 #app {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
+  height: 100dvh;
   max-width: 600px;
   margin: 0 auto;
+  overflow: hidden;
 }
 
 /* Header */
@@ -78,19 +79,16 @@ body {
 }
 
 .offline-badge {
-  display: inline-block;
-  margin-top: 8px;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 16px;
+  display: none;
 }
 
 /* Main content */
 .main-content {
   flex: 1;
+  min-height: 0;
   padding: 16px 16px calc(var(--nav-height) + var(--safe-bottom) + 16px);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Section titles */

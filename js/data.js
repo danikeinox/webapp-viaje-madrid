@@ -37,7 +37,7 @@ export const TRIP = {
     santsTrain: {
       name: 'Estación de Sants (trenes)',
       address: 'Plaça dels Països Catalans, Barcelona',
-      mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Barcelona+Sants+estación+tren',
+      mapsUrl: 'https://maps.app.goo.gl/GuMu7NTV355V4MMG9',
     },
     santsBus: {
       name: 'Estación de Autobuses de Sants',
@@ -48,6 +48,7 @@ export const TRIP = {
       name: 'Madrid Atocha (AVE)',
       address: 'Plaza del Emperador Carlos V, Madrid',
       mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Madrid+Atocha+estación',
+      locationUrl: 'https://maps.app.goo.gl/3G93ZM9uuVSKwPtv9',
     },
   },
 
@@ -124,11 +125,11 @@ export const TRIP = {
     {
       name: 'Museo del Prado',
       type: 'Museo',
-      description: 'Uno de los mejores museos del mundo. Velázquez, Goya, El Greco. Entrada gratuita ciertos horarios para mayores de 65.',
+      description: 'Uno de los mejores museos del mundo. Velázquez, Goya, El Greco.',
       address: 'Calle de Ruiz de Alarcón, 23, Madrid',
       phone: '913302800',
       mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Museo+del+Prado+Madrid',
-      tips: 'Llevar DNI. Los mayores de 65 años tienen entrada gratuita.',
+      tips: 'Llevar DNI.',
     },
     {
       name: 'Parque del Retiro',

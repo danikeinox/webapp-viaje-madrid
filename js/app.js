@@ -10,7 +10,6 @@ const helpOverlay = document.getElementById('help-overlay');
 const helpTitle = document.getElementById('help-title');
 const helpContent = document.getElementById('help-content');
 const helpClose = document.getElementById('help-close');
-const offlineBadge = document.getElementById('offline-badge');
 
 let currentSection = 'ida';
 let pendingAction = null;
@@ -80,9 +79,12 @@ function bindActionButtons(container) {
     btn.addEventListener('click', () => {
       const url = btn.dataset.url;
       const name = btn.dataset.name || 'este sitio';
+      const isLocation = btn.dataset.mapsType === 'location';
       showConfirm(
-        '¿Abrir el mapa?',
-        `Se abrirá Google Maps para ir a: ${name}`,
+        isLocation ? '¿Abrir el mapa?' : '¿Abrir el mapa?',
+        isLocation
+          ? `Se abrirá Google Maps para ver dónde estáis: ${name}`
+          : `Se abrirá Google Maps para ir a: ${name}`,
         () => { window.open(url, '_blank', 'noopener'); }
       );
     });
@@ -114,8 +116,12 @@ function bindActionButtons(container) {
   });
 }
 
-function mapsButton(name, url) {
-  return `<button class="btn btn-maps" data-action="maps" data-url="${escapeHtml(url)}" data-name="${escapeHtml(name)}">🗺️ Cómo ir (Google Maps)</button>`;
+function mapsButton(name, url, label = '🗺️ Cómo ir (Google Maps)', mapsType = 'directions') {
+  return `<button class="btn btn-maps" data-action="maps" data-url="${escapeHtml(url)}" data-name="${escapeHtml(name)}" data-maps-type="${mapsType}">${label}</button>`;
+}
+
+function locationButton(name, url) {
+  return mapsButton(name, url, '📍 ¿Dónde estoy?', 'location');
 }
 
 function phoneButton(name, phone) {
@@ -151,7 +157,6 @@ function renderIda() {
       <p class="card-text">El autobús os dejará en la <strong>Estación de Autobuses de Sants</strong>, muy cerca de la estación de tren.</p>
       <p class="card-note">💡 Desde la estación de buses hay señales para ir a Sants (trenes). Son 5-10 minutos andando.</p>
       ${mapsButton(locations.santsBus.name, locations.santsBus.mapsUrl)}
-      ${mapsButton('Estación de tren Sants', locations.santsTrain.mapsUrl)}
     </div>
 
     <div class="card">
@@ -165,7 +170,7 @@ function renderIda() {
     <div class="card">
       <h3 class="card-title"><span class="card-step-number">5</span> Llegada a Madrid Atocha</h3>
       <p class="card-text">Al bajar del tren en Atocha, seguid las señales de salida. Desde ahí podéis ir al hotel en taxi o metro.</p>
-      ${mapsButton(locations.atocha.name, locations.atocha.mapsUrl)}
+      ${locationButton(locations.atocha.name, locations.atocha.locationUrl)}
       <div class="btn-group">
         <button class="btn btn-taxi" data-action="help" data-topic="taxi">🚕 Cómo pedir un taxi</button>
       </div>
@@ -219,7 +224,7 @@ function renderHotel() {
         <li><strong>Recepción</strong>Preguntad ahí cualquier duda: taxis, restaurantes cercanos, mapas.</li>
         <li><strong>WiFi</strong>Pedid la contraseña del WiFi al llegar.</li>
         <li><strong>Desayuno</strong>Si el hotel incluye desayuno, preguntad el horario.</li>
-        <li><strong>Caja fuerte</strong>Guardad documentos y objetos de valor.</li>
+        <li><strong>Caja fuerte (opcional)</strong>Guardad documentos y objetos de valor si el hotel dispone de ella.</li>
       </ul>
     </div>
   `;
@@ -369,6 +374,13 @@ const RENDERERS = {
   vuelta: renderVuelta,
 };
 
+function scrollToTop() {
+  mainContent.scrollTop = 0;
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
+
 function render() {
   const renderer = RENDERERS[currentSection];
   mainContent.innerHTML = renderer();
@@ -378,7 +390,7 @@ function render() {
     btn.classList.toggle('active', btn.dataset.section === currentSection);
   });
 
-  mainContent.scrollTop = 0;
+  scrollToTop();
 }
 
 document.querySelectorAll('.nav-btn').forEach((btn) => {
@@ -387,14 +399,6 @@ document.querySelectorAll('.nav-btn').forEach((btn) => {
     render();
   });
 });
-
-function updateOfflineBadge() {
-  offlineBadge.hidden = navigator.onLine;
-}
-
-window.addEventListener('online', updateOfflineBadge);
-window.addEventListener('offline', updateOfflineBadge);
-updateOfflineBadge();
 
 // PWA install prompt
 let deferredPrompt = null;
