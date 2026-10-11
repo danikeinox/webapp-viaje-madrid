@@ -18,7 +18,7 @@ export const TRIP = {
   // Horas de los billetes. Si se dejan en null, la app deja apuntarlas en el propio móvil.
   // Formato 'HH:MM', por ejemplo '09:35'.
   schedules: {
-    busVilafranca: '08:00',
+    busVilafranca: '08:40',
     trainSantsMadrid: '10:40',
     trainMadridSants: '16:22',
     busSantsVilafranca: '20:45',
@@ -326,7 +326,7 @@ export const TRIP = {
       weekday: 'Martes 13',
       title: 'Viaje y llegada',
       items: [
-        { part: 'Mañana', text: 'Bus a las 8:00 en Vilafranca. Tren AVE a las 10:40 en Sants, llegada a Madrid a las 13:57.', go: { section: 'trayecto', route: 'ida' }, goLabel: 'Ver el trayecto de ida' },
+        { part: 'Mañana', text: 'Bus a las 8:40 en Vilafranca. Tren AVE a las 10:40 en Sants, llegada a Madrid a las 13:57.', go: { section: 'trayecto', route: 'ida' }, goLabel: 'Ver el trayecto de ida' },
         { part: 'Tarde', text: 'Dejad las maletas en el hostal (la entrada es a partir de las 15:30) y comed algo cerca.', go: { section: 'hostal' }, goLabel: 'Ver el hostal' },
         { part: 'Tarde', text: 'Paseo suave por la Puerta del Sol y la Plaza Mayor, a 5 minutos del hostal.' },
         { part: 'Noche', text: 'Cena cerca del hostal, por ejemplo en Casa Labra. Si volvéis tarde, usad Bolt (7 a 15 € aprox.).', go: { section: 'comer' }, goLabel: 'Ver dónde comer' },
