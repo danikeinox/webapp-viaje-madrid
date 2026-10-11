@@ -32,8 +32,8 @@ Web app **PWA** (Progressive Web App) creada como guía personal de viaje para u
 
 | Dato | Valor |
 |------|-------|
-| **Fechas** | Lunes 13 → Jueves 16 de octubre de 2026 |
-| **Noches** | 3 noches en Madrid |
+| **Fechas** | Martes 13 → Jueves 15 de octubre de 2026 |
+| **Noches** | 2 noches en Madrid |
 | **Origen** | Vilafranca del Penedès |
 | **Alojamiento** | [Hostal Madrid](https://www.hostal-madrid.info/) — Calle Esparteros, 6, 28012 Madrid |
 | **Teléfono hostal** | 915 22 00 60 |

@@ -1,451 +1,543 @@
+import '@fontsource/atkinson-hyperlegible/400.css';
+import '@fontsource/atkinson-hyperlegible/700.css';
+import { registerSW } from 'virtual:pwa-register';
 import { TRIP, HELP_TOPICS } from './data.js';
 
-const mainContent = document.getElementById('main-content');
-const modalOverlay = document.getElementById('modal-overlay');
-const modalTitle = document.getElementById('modal-title');
-const modalMessage = document.getElementById('modal-message');
-const modalConfirm = document.getElementById('modal-confirm');
-const modalCancel = document.getElementById('modal-cancel');
-const helpOverlay = document.getElementById('help-overlay');
-const helpTitle = document.getElementById('help-title');
-const helpContent = document.getElementById('help-content');
-const helpClose = document.getElementById('help-close');
+const $ = (id) => document.getElementById(id);
+const mainContent = $('main-content');
+const modalOverlay = $('modal-overlay');
+const helpOverlay = $('help-overlay');
+const announcer = $('announcer');
 
-let currentSection = 'ida';
-let pendingAction = null;
-let selectedDay = 0;
+const state = {
+  section: 'hoy',
+  route: 'ida',
+  day: 0,
+};
 
-function isPending(value) {
-  return !value || value.startsWith('PENDIENTE');
-}
-
-function pendingClass(value) {
-  return isPending(value) ? 'pending' : '';
-}
+/* ---------- Utilidades ---------- */
 
 function escapeHtml(text) {
   const div = document.createElement('div');
-  div.textContent = text;
+  div.textContent = text ?? '';
   return div.innerHTML;
 }
 
-function formatPhone(phone) {
-  return phone.replace(/\s/g, '');
+function icon(name) {
+  return `<svg class="i" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 }
 
-function showConfirm(title, message, onConfirm) {
-  modalTitle.textContent = title;
-  modalMessage.textContent = message;
-  pendingAction = onConfirm;
-  modalOverlay.hidden = false;
-  modalConfirm.focus();
+function store(key, value) {
+  try {
+    if (value === undefined) return JSON.parse(localStorage.getItem(key));
+    if (value === null) localStorage.removeItem(key);
+    else localStorage.setItem(key, JSON.stringify(value));
+  } catch { /* sin almacenamiento: la app sigue funcionando */ }
+  return null;
 }
 
-function hideConfirm() {
-  modalOverlay.hidden = true;
+function announce(text) {
+  announcer.textContent = '';
+  setTimeout(() => { announcer.textContent = text; }, 50);
+}
+
+const MONTHS_DAY = { start: new Date(2026, 9, 13), end: new Date(2026, 9, 15) };
+
+function startOfToday() {
+  const n = new Date();
+  return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+}
+
+function daysBetween(a, b) {
+  return Math.round((b - a) / 86400000);
+}
+
+function todayIso() {
+  const t = startOfToday();
+  const mm = String(t.getMonth() + 1).padStart(2, '0');
+  const dd = String(t.getDate()).padStart(2, '0');
+  return `${t.getFullYear()}-${mm}-${dd}`;
+}
+
+/* ---------- Horas de los billetes (se guardan en el móvil) ---------- */
+
+function getTime(key) {
+  const saved = store('madrid.times');
+  return (saved && saved[key]) || TRIP.schedules[key] || '';
+}
+
+function setTime(key, value) {
+  const saved = store('madrid.times') || {};
+  if (value) saved[key] = value;
+  else delete saved[key];
+  store('madrid.times', saved);
+}
+
+function timeBox(key) {
+  const value = getTime(key);
+  const label = TRIP.scheduleLabels[key];
+  const input = `<input type="time" data-time="${key}" value="${escapeHtml(value)}" aria-label="${escapeHtml(label)}">`;
+  if (value) {
+    return `<label class="timebox set">${icon('clock')}<span><span class="timebox-time">${escapeHtml(value)}</span><span class="timebox-hint">${escapeHtml(label)}. Tocad para cambiarla</span></span>${input}</label>`;
+  }
+  return `<label class="timebox pending">${icon('pencil')}<span>Apuntar la hora<span class="timebox-hint">${escapeHtml(label)}</span></span>${input}</label>`;
+}
+
+/* ---------- Ventanas (confirmar / ayuda) ---------- */
+
+let pendingAction = null;
+let lastFocus = null;
+let openOverlay = null;
+
+function openDialog(overlay, focusEl) {
+  lastFocus = document.activeElement;
+  openOverlay = overlay;
+  overlay.hidden = false;
+  focusEl.focus();
+}
+
+function closeDialog() {
+  if (!openOverlay) return;
+  openOverlay.hidden = true;
+  openOverlay = null;
   pendingAction = null;
+  if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+}
+
+function showConfirm(title, message, confirmLabel, onConfirm) {
+  $('modal-title').textContent = title;
+  $('modal-message').textContent = message;
+  $('modal-confirm').textContent = confirmLabel;
+  pendingAction = onConfirm;
+  openDialog(modalOverlay, $('modal-cancel'));
 }
 
 function showHelp(topicKey) {
   const topic = HELP_TOPICS[topicKey];
   if (!topic) return;
-  helpTitle.textContent = topic.title;
-  helpContent.innerHTML = topic.content;
-  helpOverlay.hidden = false;
-  helpClose.focus();
+  $('help-title').textContent = topic.title;
+  $('help-content').innerHTML = topic.content;
+  openDialog(helpOverlay, $('help-close'));
 }
 
-modalConfirm.addEventListener('click', () => {
-  if (pendingAction) pendingAction();
-  hideConfirm();
+$('modal-confirm').addEventListener('click', () => {
+  const action = pendingAction;
+  closeDialog();
+  if (action) action();
+});
+$('modal-cancel').addEventListener('click', closeDialog);
+$('help-close').addEventListener('click', closeDialog);
+[modalOverlay, helpOverlay].forEach((o) => o.addEventListener('click', (e) => { if (e.target === o) closeDialog(); }));
+
+document.addEventListener('keydown', (e) => {
+  if (!openOverlay) return;
+  if (e.key === 'Escape') { closeDialog(); return; }
+  if (e.key === 'Tab') {
+    const f = [...openOverlay.querySelectorAll('button:not([hidden])')];
+    if (!f.length) return;
+    const first = f[0];
+    const last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
 });
 
-modalCancel.addEventListener('click', hideConfirm);
+/* ---------- Botones reutilizables ---------- */
 
-modalOverlay.addEventListener('click', (e) => {
-  if (e.target === modalOverlay) hideConfirm();
-});
-
-helpClose.addEventListener('click', () => {
-  helpOverlay.hidden = true;
-});
-
-helpOverlay.addEventListener('click', (e) => {
-  if (e.target === helpOverlay) helpOverlay.hidden = true;
-});
-
-function bindActionButtons(container) {
-  container.querySelectorAll('[data-action="maps"]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const url = btn.dataset.url;
-      const name = btn.dataset.name || 'este sitio';
-      const isLocation = btn.dataset.mapsType === 'location';
-      showConfirm(
-        isLocation ? '¿Abrir el mapa?' : '¿Abrir el mapa?',
-        isLocation
-          ? `Se abrirá Google Maps para ver dónde estáis: ${name}`
-          : `Se abrirá Google Maps para ir a: ${name}`,
-        () => { window.open(url, '_blank', 'noopener'); }
-      );
-    });
-  });
-
-  container.querySelectorAll('[data-action="phone"]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const phone = btn.dataset.phone;
-      const name = btn.dataset.name || 'este número';
-      showConfirm(
-        '¿Seguro que quieres llamar?',
-        `Se marcará el teléfono de: ${name}`,
-        () => { window.location.href = `tel:${formatPhone(phone)}`; }
-      );
-    });
-  });
-
-  container.querySelectorAll('[data-action="help"]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      showHelp(btn.dataset.topic);
-    });
-  });
-
-  container.querySelectorAll('[data-action="day-tab"]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      selectedDay = parseInt(btn.dataset.day, 10);
-      render();
-    });
-  });
+function mapsBtn(name, url, label = 'Cómo ir', type = 'directions') {
+  return `<button class="btn btn-maps" type="button" data-action="maps" data-url="${escapeHtml(url)}" data-name="${escapeHtml(name)}" data-type="${type}">${icon('pin')}<span>${escapeHtml(label)}</span></button>`;
 }
 
-function mapsButton(name, url, label = '🗺️ Cómo ir (Google Maps)', mapsType = 'directions') {
-  return `<button class="btn btn-maps" data-action="maps" data-url="${escapeHtml(url)}" data-name="${escapeHtml(name)}" data-maps-type="${mapsType}">${label}</button>`;
-}
-
-function locationButton(name, url) {
-  return mapsButton(name, url, '📍 ¿Dónde estoy?', 'location');
-}
-
-function phoneButton(name, phone, label = '📞 Llamar para reservar') {
+function phoneBtn(name, phone, label = 'Llamar') {
   if (!phone) return '';
-  return `<button class="btn btn-phone" data-action="phone" data-phone="${escapeHtml(phone)}" data-name="${escapeHtml(name)}">${label}</button>`;
+  return `<button class="btn btn-phone" type="button" data-action="phone" data-phone="${escapeHtml(phone)}" data-name="${escapeHtml(name)}">${icon('phone')}<span>${escapeHtml(label)}</span></button>`;
 }
 
-function hotelMapsUrl(h) {
-  return h.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.mapsQuery)}`;
+function webBtn(name, url, label = 'Abrir la web') {
+  return `<button class="btn btn-outline" type="button" data-action="web" data-url="${escapeHtml(url)}" data-name="${escapeHtml(name)}">${icon('globe')}<span>${escapeHtml(label)}</span></button>`;
 }
 
-function renderIda() {
-  const { locations, schedules } = TRIP;
+function helpBtn(topic, label, cls = 'btn-outline', ic = 'help') {
+  return `<button class="btn ${cls}" type="button" data-action="help" data-topic="${topic}">${icon(ic)}<span>${escapeHtml(label)}</span></button>`;
+}
+
+const note = (text) => `<div class="note">${icon('bulb')}<span>${escapeHtml(text)}</span></div>`;
+const warn = (text) => `<div class="warn">${icon('alert')}<span>${escapeHtml(text)}</span></div>`;
+
+function facts(rows) {
+  const items = rows.filter(([, v]) => v).map(([k, v]) => `<div><dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd></div>`).join('');
+  return items ? `<dl class="facts">${items}</dl>` : '';
+}
+
+/* ---------- Pantalla: Hoy ---------- */
+
+function ticketHero() {
+  const today = startOfToday();
+  const toStart = daysBetween(today, MONTHS_DAY.start);
+  const toEnd = daysBetween(today, MONTHS_DAY.end);
+  let big;
+  let text;
+  let sub;
+  if (toStart > 0) {
+    big = String(toStart);
+    text = toStart === 1 ? 'día para salir' : 'días para salir';
+    sub = 'Salís el martes 13 de octubre';
+  } else if (toEnd >= 0) {
+    const n = 3 - toEnd;
+    big = String(n);
+    text = `Hoy es el día ${n} de 3`;
+    sub = TRIP.days[Math.min(n - 1, 2)].weekday;
+  } else {
+    big = '✓';
+    text = 'Viaje terminado';
+    sub = 'Esperamos que haya ido muy bien';
+  }
   return `
-    <h2 class="section-title">🚌 Ida a Madrid</h2>
-    <p class="section-intro">${TRIP.dates.outbound}</p>
-
-    <div class="card card-highlight">
-      <p class="card-text"><strong>Recorrido:</strong> Casa → Bus Vilafranca → Sants → Tren AVE → Madrid Atocha → Hotel</p>
-    </div>
-
-    <div class="card">
-      <h3 class="card-title"><span class="card-step-number">1</span> Salir de casa</h3>
-      <p class="card-text">Salid con tiempo suficiente para no ir con prisas. Llevad DNI, billetes y maletas.</p>
-      <div class="card-warning">⏰ Salid con al menos 30 minutos de margen antes de la hora del bus.</div>
-    </div>
-
-    <div class="card">
-      <h3 class="card-title"><span class="card-step-number">2</span> Bus a Vilafranca</h3>
-      <p class="card-text">Id a la parada de bus habitual de Vilafranca del Penedès.</p>
-      <p class="card-time ${pendingClass(schedules.busVilafranca)}">🕐 ${escapeHtml(schedules.busVilafranca)}</p>
-      ${mapsButton(locations.busVilafranca.name, locations.busVilafranca.mapsUrl)}
-    </div>
-
-    <div class="card">
-      <h3 class="card-title"><span class="card-step-number">3</span> Bus Vilafranca → Sants</h3>
-      <p class="card-text">El autobús os dejará en la <strong>Estación de Autobuses de Sants</strong>, muy cerca de la estación de tren.</p>
-      <p class="card-note">💡 Desde la estación de buses hay señales para ir a Sants (trenes). Son 5-10 minutos andando.</p>
-      ${mapsButton(locations.santsBus.name, locations.santsBus.mapsUrl)}
-    </div>
-
-    <div class="card">
-      <h3 class="card-title"><span class="card-step-number">4</span> Tren AVE Sants → Madrid Atocha</h3>
-      <p class="card-text">En Sants, buscad el andén del tren de alta velocidad (AVE) con destino <strong>Madrid Atocha</strong>.</p>
-      <p class="card-time ${pendingClass(schedules.trainSantsMadrid)}">🕐 ${escapeHtml(schedules.trainSantsMadrid)}</p>
-      <div class="card-note">💡 Llegad a Sants con 20-30 min de antelación. El tren AVE sale puntual.</div>
-      ${mapsButton(locations.santsTrain.name, locations.santsTrain.mapsUrl)}
-    </div>
-
-    <div class="card">
-      <h3 class="card-title"><span class="card-step-number">5</span> Llegada a Madrid Atocha</h3>
-      <p class="card-text">Al bajar del tren en Atocha, seguid las señales de salida. Desde ahí podéis ir al hotel en taxi o metro.</p>
-      ${locationButton(locations.atocha.name, locations.atocha.locationUrl)}
-      <div class="btn-group">
-        <button class="btn btn-taxi" data-action="help" data-topic="taxi">🚕 Cómo pedir un taxi</button>
+    <section class="ticket" aria-label="Resumen del viaje">
+      <div class="ticket-top">
+        <div class="ticket-route">
+          <span>Vilafranca</span><span class="ticket-route-line" aria-hidden="true"></span>${icon('train')}<span class="ticket-route-line" aria-hidden="true"></span><span>Madrid</span>
+        </div>
+        <p class="ticket-dates">Del martes 13 al jueves 15 de octubre · 2 noches</p>
       </div>
-    </div>
-
-    <div class="card">
-      <h3 class="card-title"><span class="card-step-number">6</span> Ir al hotel</h3>
-      <p class="card-text">Dejad las maletas en el hotel. Si llegáis antes de la hora de entrada, la recepción suele guardarlas.</p>
-      <p class="card-text"><strong>Hostal:</strong> ${escapeHtml(TRIP.hotel.name)}</p>
-      <p class="card-text"><strong>Dirección:</strong> ${escapeHtml(TRIP.hotel.address)}</p>
-      ${TRIP.hotel.phone ? phoneButton(TRIP.hotel.name, TRIP.hotel.phone, '📞 Llamar al hostal') : ''}
-      ${mapsButton(TRIP.hotel.name, hotelMapsUrl(TRIP.hotel))}
-    </div>
-
-    <div class="btn-group">
-      <button class="btn btn-help" data-action="help" data-topic="emergency">🆘 Teléfonos de emergencia</button>
-      <button class="btn btn-help" data-action="help" data-topic="app">❓ Cómo usar esta app</button>
-    </div>
-  `;
+      <div class="ticket-cut" aria-hidden="true"></div>
+      <div class="ticket-bottom">
+        <span class="ticket-count" aria-hidden="true">${big}</span>
+        <p class="ticket-count-text">${escapeHtml(text)}<br><span class="ticket-count-sub">${escapeHtml(sub)}</span></p>
+      </div>
+    </section>`;
 }
 
-function renderHotel() {
-  const h = TRIP.hotel;
+function renderHoy() {
+  const day = TRIP.days[state.day];
+  const tabs = TRIP.days.map((d, i) => `
+    <button class="seg-btn" type="button" data-action="day" data-day="${i}" aria-pressed="${i === state.day}">${escapeHtml(d.weekday)}</button>`).join('');
+
+  const items = day.items.map((it) => `
+    <li class="agenda-item">
+      <span class="agenda-part">${escapeHtml(it.part)}</span>
+      <div>
+        <p class="agenda-text">${escapeHtml(it.text)}</p>
+        ${it.go && it.go.help ? `<button class="btn btn-outline" type="button" data-action="help" data-topic="${it.go.help}">${icon('help')}<span>${escapeHtml(it.goLabel)}</span></button>` : it.go ? `<button class="btn btn-outline" type="button" data-action="go" data-section="${it.go.section}" ${it.go.route ? `data-route="${it.go.route}"` : ''}>${icon('arrow')}<span>${escapeHtml(it.goLabel)}</span></button>` : ''}
+      </div>
+    </li>`).join('');
+
+  const taxi = TRIP.taxis.madrid[0];
   return `
-    <h2 class="section-title">🏨 Hostal</h2>
-    <p class="section-intro">Hostal Madrid — 3 noches en pleno centro</p>
+    <h2 class="page-title" tabindex="-1">Hoy</h2>
+    <p class="page-intro">Vuestro plan, día a día.</p>
+    <div id="install-slot"></div>
+    ${ticketHero()}
 
-    <div class="card card-highlight">
-      <h3 class="card-title">${escapeHtml(h.name)}</h3>
-      <p class="card-text"><strong>📍 Dirección:</strong> ${escapeHtml(h.address)}</p>
-      <p class="card-text"><strong>📞 Teléfono:</strong> 915 22 00 60</p>
-      <p class="card-text"><strong>📅 Entrada:</strong> ${escapeHtml(h.checkIn)}</p>
-      <p class="card-text"><strong>📅 Salida:</strong> ${escapeHtml(h.checkOut)} (jueves 16)</p>
-      <p class="card-note">${escapeHtml(h.notes)}</p>
-      <div class="btn-group">
-        ${mapsButton(h.name, hotelMapsUrl(h))}
-        ${h.phone ? phoneButton(h.name, h.phone, '📞 Llamar al hostal') : ''}
-      </div>
-    </div>
+    <div class="segmented" role="group" aria-label="Elegir día">${tabs}</div>
+    <section class="panel" aria-label="Plan del ${escapeHtml(day.weekday)}">
+      <h3 class="panel-title">${escapeHtml(day.weekday)}: ${escapeHtml(day.title)}</h3>
+      <ul class="agenda">${items}</ul>
+    </section>
 
-    <div class="card">
-      <h3 class="card-title">Del hostal a Atocha (para la vuelta)</h3>
-      <p class="card-text">El jueves 16, salid del hotel con tiempo para llegar a Atocha con margen antes del tren.</p>
-      <p class="card-warning">⏰ Calculad 45-60 minutos desde el hotel hasta estar en el andén de Atocha.</p>
-      ${mapsButton('Madrid Atocha', TRIP.locations.atocha.mapsUrl)}
-      <button class="btn btn-taxi" data-action="help" data-topic="taxi">🚕 Cómo pedir un taxi</button>
-    </div>
+    <section class="panel">
+      <h3 class="panel-title">De noche, mejor en Bolt</h3>
+      <p>Para ir a cenar o volver al hostal por la noche, usad Bolt, Uber o Cabify. Un viaje cuesta aproximadamente de 7 a 15 €. Antes de subir, comprobad la matrícula y el modelo del coche.</p>
+      <div class="btn-group">${helpBtn('apps', 'Cómo usar Bolt paso a paso', 'btn-taxi', 'taxi')}</div>
+    </section>
 
-    <div class="card">
-      <h3 class="card-title">Consejos del hostal</h3>
-      <ul class="help-list">
-        <li><strong>Recepción</strong>El personal os orientará sobre dónde comer, visitar y cómo moveros por el centro.</li>
-        <li><strong>Ubicación</strong>Estáis entre Puerta del Sol y Plaza Mayor, lo más céntrico de Madrid.</li>
-        <li><strong>WiFi</strong>Pedid la contraseña del WiFi al llegar.</li>
-        <li><strong>Lavandería</strong>El hostal dispone de lavandería para huéspedes — preguntad en recepción.</li>
-        <li><strong>Caja fuerte (opcional)</strong>Guardad documentos y objetos de valor si el hostal dispone de ella.</li>
-      </ul>
-    </div>
-  `;
+    <h3 class="group-title">El tiempo en Madrid</h3>
+    <div id="weather-box"><p class="weather-note">Cargando previsión…</p></div>
+
+    <h3 class="group-title">Ayuda rápida</h3>
+    <div class="quick">
+      ${phoneBtn(TRIP.hotel.name, TRIP.hotel.phone, 'Llamar al hostal')}
+      ${phoneBtn(taxi.name, taxi.phone, 'Pedir taxi')}
+      ${helpBtn('emergency', 'Emergencias 112', 'btn-sos', 'sos')}
+      ${helpBtn('app', 'Cómo usar la guía')}
+    </div>`;
 }
 
-function renderRestaurantes() {
-  const cards = TRIP.restaurants.map((r) => `
-    <div class="card place-card">
-      <p class="place-type">${escapeHtml(r.type)}</p>
-      <h3 class="card-title">${escapeHtml(r.name)}</h3>
-      <p class="card-text">${escapeHtml(r.description)}</p>
-      <p class="card-text"><strong>📍</strong> ${escapeHtml(r.address)}</p>
-      ${r.reserve ? '<p class="card-note">📞 Se recomienda reservar con antelación</p>' : '<p class="card-note">Sin necesidad de reserva</p>'}
-      <div class="btn-group">
-        ${mapsButton(r.name, r.mapsUrl)}
-        ${phoneButton(r.name, r.phone)}
-      </div>
-    </div>
-  `).join('');
+/* ---------- Tiempo (se descarga con internet y se guarda para verlo sin conexión) ---------- */
 
-  return `
-    <h2 class="section-title">🍽️ Restaurantes</h2>
-    <p class="section-intro">Sitios de referencia para comer en Madrid. Pulsad "Llamar" solo si queréis reservar.</p>
-    ${cards}
-    <div class="btn-group">
-      <button class="btn btn-help" data-action="help" data-topic="maps">🗺️ Cómo usar Google Maps</button>
-    </div>
-  `;
-}
-
-function renderOcio() {
-  const dayTabs = TRIP.days.map((d, i) => `
-    <button class="day-tab ${i === selectedDay ? 'active' : ''}" data-action="day-tab" data-day="${i}">${escapeHtml(d.label)}</button>
-  `).join('');
-
-  const day = TRIP.days[selectedDay];
-  const dayPlan = day.activities.map((a) => `<li>${escapeHtml(a)}</li>`).join('');
-
-  const placeCards = TRIP.ocio.map((p) => `
-    <div class="card place-card">
-      <p class="place-type">${escapeHtml(p.type)}</p>
-      <h3 class="card-title">${escapeHtml(p.name)}</h3>
-      <p class="card-text">${escapeHtml(p.description)}</p>
-      <p class="card-text"><strong>📍</strong> ${escapeHtml(p.address)}</p>
-      ${p.tips ? `<p class="card-note">💡 ${escapeHtml(p.tips)}</p>` : ''}
-      <div class="btn-group">
-        ${mapsButton(p.name, p.mapsUrl)}
-        ${p.phone ? phoneButton(p.name, p.phone) : ''}
-      </div>
-    </div>
-  `).join('');
-
-  return `
-    <h2 class="section-title">🎭 Ocio y plan del día</h2>
-    <p class="section-intro">Lugares interesantes y plan sugerido para cada día</p>
-
-    <div class="day-tabs">${dayTabs}</div>
-
-    <div class="card card-highlight">
-      <h3 class="card-title">${escapeHtml(day.title)}</h3>
-      <ul class="help-list">${dayPlan}</ul>
-    </div>
-
-    <h3 class="section-title" style="font-size: 22px; margin-top: 8px;">Lugares recomendados</h3>
-    ${placeCards}
-
-    <div class="btn-group">
-      <button class="btn btn-taxi" data-action="help" data-topic="taxi">🚕 Cómo pedir un taxi</button>
-      <button class="btn btn-help" data-action="help" data-topic="emergency">🆘 Emergencias</button>
-    </div>
-  `;
-}
-
-function renderVuelta() {
-  const { locations, schedules } = TRIP;
-  return `
-    <h2 class="section-title">🏠 Vuelta a casa</h2>
-    <p class="section-intro">${TRIP.dates.return}</p>
-
-    <div class="card card-highlight">
-      <p class="card-text"><strong>Recorrido:</strong> Hotel → Madrid Atocha → Sants (tren) → Sants (bus) → Vilafranca → Casa</p>
-    </div>
-
-    <div class="card">
-      <h3 class="card-title"><span class="card-step-number">1</span> Check-out del hotel</h3>
-      <p class="card-text">Dejad la habitación antes de las 12:00. Dejad las maletas en recepción si salís antes.</p>
-      <p class="card-warning">⏰ Desayunad con tiempo. No dejéis nada en la habitación.</p>
-    </div>
-
-    <div class="card">
-      <h3 class="card-title"><span class="card-step-number">2</span> Del hotel a Madrid Atocha</h3>
-      <p class="card-text">Id en taxi o transporte público a la estación de Atocha. Llevad tiempo de sobra.</p>
-      <p class="card-warning">⏰ Salid del hotel al menos 1 hora antes de la hora del tren.</p>
-      ${mapsButton(locations.atocha.name, locations.atocha.mapsUrl)}
-      <button class="btn btn-taxi" data-action="help" data-topic="taxi">🚕 Cómo pedir un taxi</button>
-    </div>
-
-    <div class="card">
-      <h3 class="card-title"><span class="card-step-number">3</span> Tren AVE Madrid Atocha → Sants</h3>
-      <p class="card-text">Buscad el andén del tren con destino <strong>Barcelona Sants</strong>.</p>
-      <p class="card-time ${pendingClass(schedules.trainMadridSants)}">🕐 ${escapeHtml(schedules.trainMadridSants)}</p>
-      <div class="card-note">💡 Estad en el andén 20 minutos antes de la salida.</div>
-    </div>
-
-    <div class="card">
-      <h3 class="card-title"><span class="card-step-number">4</span> De Sants (tren) a Sants (bus)</h3>
-      <p class="card-text">Al bajar del tren en Sants, seguid las señales hacia la <strong>Estación de Autobuses</strong>. Está muy cerca, 5-10 minutos andando.</p>
-      ${mapsButton(locations.santsBus.name, locations.santsBus.mapsUrl)}
-    </div>
-
-    <div class="card">
-      <h3 class="card-title"><span class="card-step-number">5</span> Bus Sants → Vilafranca</h3>
-      <p class="card-text">Coged el autobús con destino <strong>Vilafranca del Penedès</strong>.</p>
-      <p class="card-time ${pendingClass(schedules.busSantsVilafranca)}">🕐 ${escapeHtml(schedules.busSantsVilafranca)}</p>
-      <div class="card-note">💡 Comprad el billete con antelación si es posible. Guardad los billetes hasta llegar.</div>
-    </div>
-
-    <div class="card">
-      <h3 class="card-title"><span class="card-step-number">6</span> Llegada a Vilafranca</h3>
-      <p class="card-text">¡Ya estáis en casa! El bus os dejará en la estación de autobuses de Vilafranca.</p>
-      ${mapsButton(locations.busVilafranca.name, locations.busVilafranca.mapsUrl)}
-    </div>
-
-    <div class="card">
-      <h3 class="card-title">Taxis de referencia</h3>
-      <p class="card-text"><strong>Madrid:</strong></p>
-      <div class="btn-group">
-        ${TRIP.taxis.madrid.map((t) => phoneButton(t.name, t.phone)).join('')}
-      </div>
-      <p class="card-text" style="margin-top: 16px;"><strong>Barcelona (Sants):</strong></p>
-      <div class="btn-group">
-        ${TRIP.taxis.barcelona.map((t) => phoneButton(t.name, t.phone)).join('')}
-      </div>
-    </div>
-
-    <div class="btn-group">
-      <button class="btn btn-help" data-action="help" data-topic="emergency">🆘 Teléfonos de emergencia</button>
-    </div>
-  `;
-}
-
-const RENDERERS = {
-  ida: renderIda,
-  hotel: renderHotel,
-  restaurantes: renderRestaurantes,
-  ocio: renderOcio,
-  vuelta: renderVuelta,
+const WEATHER = {
+  0: ['Despejado', 'sun'], 1: ['Casi despejado', 'sun'], 2: ['Nubes y claros', 'cloud'], 3: ['Nublado', 'cloud'],
+  45: ['Niebla', 'cloud'], 48: ['Niebla', 'cloud'],
+  51: ['Llovizna', 'rain'], 53: ['Llovizna', 'rain'], 55: ['Llovizna', 'rain'],
+  61: ['Lluvia', 'rain'], 63: ['Lluvia', 'rain'], 65: ['Lluvia fuerte', 'rain'],
+  80: ['Chubascos', 'rain'], 81: ['Chubascos', 'rain'], 82: ['Chubascos fuertes', 'rain'],
+  95: ['Tormenta', 'rain'], 96: ['Tormenta', 'rain'], 99: ['Tormenta', 'rain'],
 };
 
-function scrollToTop() {
-  mainContent.scrollTop = 0;
-  window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-  document.documentElement.scrollTop = 0;
-  document.body.scrollTop = 0;
+function weatherHtml(data, savedAt, offline) {
+  const cols = data.time.map((date, i) => {
+    const [label, ic] = WEATHER[data.weathercode[i]] || ['Variable', 'cloud'];
+    const d = TRIP.days.find((x) => x.date === date);
+    return `
+      <div class="weather-day ${date === todayIso() ? 'today' : ''}">
+        <div class="weather-name">${escapeHtml(d ? d.weekday : date)}</div>
+        ${icon(ic)}
+        <div class="weather-temp">${Math.round(data.temperature_2m_max[i])}° / ${Math.round(data.temperature_2m_min[i])}°</div>
+        <div class="weather-rain">${escapeHtml(label)}<br>Lluvia: ${data.precipitation_probability_max[i] ?? 0}%</div>
+      </div>`;
+  }).join('');
+  const when = new Date(savedAt).toLocaleString('es-ES', { weekday: 'long', hour: '2-digit', minute: '2-digit' });
+  const msg = offline ? `Sin conexión. Última previsión guardada: ${when}.` : `Previsión actualizada: ${when}.`;
+  return `<div class="weather">${cols}</div><p class="weather-note">${escapeHtml(msg)} Máxima / mínima.</p>`;
 }
 
-function render() {
-  const renderer = RENDERERS[currentSection];
-  mainContent.innerHTML = renderer();
-  bindActionButtons(mainContent);
+async function loadWeather() {
+  const box = $('weather-box');
+  if (!box) return;
+  const cached = store('madrid.weather');
+  if (cached) box.innerHTML = weatherHtml(cached.data, cached.savedAt, true);
+  try {
+    const { lat, lon } = TRIP.weather;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Europe%2FMadrid&start_date=${TRIP.start}&end_date=${TRIP.end}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('bad status');
+    const json = await res.json();
+    const entry = { data: json.daily, savedAt: Date.now() };
+    store('madrid.weather', entry);
+    const live = $('weather-box');
+    if (live) live.innerHTML = weatherHtml(entry.data, entry.savedAt, false);
+  } catch {
+    const live = $('weather-box');
+    if (live && !cached) live.innerHTML = '<p class="weather-note">La previsión se verá cuando tengáis internet. Mirad el cielo y llevad un paraguas pequeño por si acaso.</p>';
+  }
+}
 
+/* ---------- Pantalla: Trayecto ---------- */
+
+function renderStep(step) {
+  const parts = [`<p>${escapeHtml(step.text)}</p>`];
+  if (step.time) parts.push(timeBox(step.time));
+  if (step.facts) parts.push(facts(step.facts));
+  if (step.time) parts.push(note('El billete está guardado en WhatsApp. Abridlo antes de llegar al control y enseñadlo desde el móvil.'));
+  if (step.warn) parts.push(warn(step.warn));
+  if (step.tip) parts.push(note(step.tip));
+  const btns = [];
+  if (step.location) btns.push(mapsBtn(TRIP.locations.atocha.name, TRIP.locations.atocha.locationUrl, '¿Dónde estoy?', 'location'));
+  if (step.map) btns.push(mapsBtn(TRIP.locations[step.map].name, TRIP.locations[step.map].mapsUrl));
+  if (step.hotel) {
+    btns.push(mapsBtn(TRIP.hotel.name, TRIP.hotel.mapsUrl));
+    btns.push(phoneBtn(TRIP.hotel.name, TRIP.hotel.phone, 'Llamar al hostal'));
+  }
+  if (step.taxi) btns.push(helpBtn('taxi', 'Cómo pedir un taxi', 'btn-taxi', 'taxi'));
+  (step.help || []).forEach(([topic, label]) => btns.push(helpBtn(topic, label, 'btn-outline', 'train')));
+  if (step.taxiBarcelona) btns.push(phoneBtn(TRIP.taxis.barcelona[0].name, TRIP.taxis.barcelona[0].phone, 'Llamar a un taxi en Barcelona'));
+  return `
+    <li class="step">
+      <h3 class="step-title">${escapeHtml(step.title)}</h3>
+      <div class="step-body">${parts.join('')}${btns.length ? `<div class="btn-group">${btns.join('')}</div>` : ''}</div>
+    </li>`;
+}
+
+function renderTrayecto() {
+  const r = TRIP.routes[state.route];
+  const tabs = [['ida', 'Ida', 'Martes 13'], ['vuelta', 'Vuelta', 'Jueves 15']].map(([k, l, d]) => `
+    <button class="seg-btn" type="button" data-action="route" data-route="${k}" aria-pressed="${state.route === k}">${l}<small>${d}</small></button>`).join('');
+  return `
+    <h2 class="page-title" tabindex="-1">${escapeHtml(r.title)}</h2>
+    <p class="page-intro">${escapeHtml(r.summary)}</p>
+    <div class="segmented" role="group" aria-label="Elegir trayecto">${tabs}</div>
+    <ol class="steps">${r.steps.map(renderStep).join('')}</ol>
+    <div class="btn-group">${helpBtn('emergency', 'Teléfonos de emergencia', 'btn-sos', 'sos')}</div>`;
+}
+
+/* ---------- Pantalla: Hostal ---------- */
+
+function renderHostal() {
+  const h = TRIP.hotel;
+  return `
+    <h2 class="page-title" tabindex="-1">Hostal</h2>
+    <p class="page-intro">2 noches, del martes 13 al jueves 15.</p>
+    <section class="panel">
+      <h3 class="panel-title">${escapeHtml(h.name)}</h3>
+      ${facts([
+        ['Dirección', h.address],
+        ['Teléfono', h.phoneText],
+        ['Entrada', `${h.checkIn} (martes 13)`],
+        ['Salida', `${h.checkOut} (jueves 15)`],
+        ['Recepción', h.receptionHours],
+      ])}
+      <p>${escapeHtml(h.notes)}</p>
+      ${warn(h.verify)}
+      <div class="btn-group">
+        ${phoneBtn(h.name, h.phone, 'Llamar al hostal')}
+        ${mapsBtn(h.name, h.mapsUrl)}
+        ${webBtn(h.name, h.website, 'Web del hostal')}
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3 class="panel-title">Del hostal a la estación (jueves)</h3>
+      <p>Salid del hostal al menos 1 hora y media antes del tren. Atocha es una estación grande y con control de equipaje.</p>
+      <div class="btn-group">
+        ${mapsBtn(TRIP.locations.atocha.name, TRIP.locations.atocha.mapsUrl)}
+        ${helpBtn('taxi', 'Cómo pedir un taxi', 'btn-taxi', 'taxi')}
+        ${helpBtn('apps', 'Moverse con Bolt', 'btn-taxi', 'taxi')}
+        ${helpBtn('metro', 'Ir en metro')}
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3 class="panel-title">Consejos</h3>
+      <ul class="help-list">
+        <li><strong>WiFi</strong>Pedid la contraseña en recepción al llegar.</li>
+        <li><strong>Antes de salir</strong>Coged la llave y una tarjeta del hostal con la dirección por si os perdéis.</li>
+        <li><strong>Ubicación</strong>Estáis entre la Puerta del Sol y la Plaza Mayor: casi todo se hace andando.</li>
+      </ul>
+    </section>`;
+}
+
+/* ---------- Pantallas: Comer y Ver ---------- */
+
+function placeCard(p, extra = '') {
+  return `
+    <section class="panel">
+      <p class="place-type">${escapeHtml(p.type)}</p>
+      <h3 class="panel-title">${escapeHtml(p.name)}</h3>
+      <p>${escapeHtml(p.description)}</p>
+      ${facts([['Dirección', p.address], ['Horario', p.hours], ['Vuestro sitio', p.seats], ['Precio', p.price], ['Teléfono', p.phone ? p.phone.replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') : '']])}
+      ${p.warning ? warn(p.warning) : ''}
+      ${p.tips ? note(p.tips) : ''}
+      ${extra}
+      ${p.verify ? '<p class="verify">Horario y datos sin confirmar en la web oficial. Mejor llamar antes de ir.</p>' : ''}
+      <div class="btn-group">
+        ${mapsBtn(p.name, p.mapsUrl)}
+        ${phoneBtn(p.name, p.phone, p.reserve ? 'Llamar para reservar' : 'Llamar')}
+        ${p.web ? webBtn(p.name, p.web, 'Web y entradas') : ''}
+      </div>
+    </section>`;
+}
+
+function renderComer() {
+  const reserveNote = (r) => (r.reserve ? note('Conviene reservar con antelación.') : note('No hace falta reservar.'));
+  return `
+    <h2 class="page-title" tabindex="-1">Dónde comer</h2>
+    <p class="page-intro">Sitios de confianza cerca del centro. Pulsad "Llamar" solo si queréis reservar.</p>
+    ${TRIP.restaurants.map((r) => placeCard(r, reserveNote(r))).join('')}
+    <div class="btn-group">${helpBtn('maps', 'Cómo usar Google Maps', 'btn-outline', 'pin')}</div>`;
+}
+
+function renderVer() {
+  return `
+    <h2 class="page-title" tabindex="-1">Qué ver</h2>
+    <p class="page-intro">Lugares para pasear o visitar con calma. Los horarios son los de entre semana.</p>
+    ${TRIP.ocio.map((p) => placeCard(p)).join('')}
+    <div class="btn-group">
+      ${helpBtn('taxi', 'Cómo pedir un taxi', 'btn-taxi', 'taxi')}
+      ${helpBtn('apps', 'Moverse con Bolt', 'btn-taxi', 'taxi')}
+      ${helpBtn('emergency', 'Emergencias', 'btn-sos', 'sos')}
+    </div>`;
+}
+
+/* ---------- Navegación ---------- */
+
+const RENDERERS = { hoy: renderHoy, trayecto: renderTrayecto, hostal: renderHostal, comer: renderComer, ver: renderVer };
+
+function render({ resetScroll = true } = {}) {
+  const y = mainContent.scrollTop;
+  mainContent.innerHTML = RENDERERS[state.section]();
   document.querySelectorAll('.nav-btn').forEach((btn) => {
-    btn.classList.toggle('active', btn.dataset.section === currentSection);
+    const on = btn.dataset.section === state.section;
+    btn.classList.toggle('active', on);
+    if (on) btn.setAttribute('aria-current', 'page');
+    else btn.removeAttribute('aria-current');
   });
-
-  scrollToTop();
+  mainContent.scrollTop = resetScroll ? 0 : y;
+  if (state.section === 'hoy') { loadWeather(); mountInstall(); }
 }
 
-document.querySelectorAll('.nav-btn').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    currentSection = btn.dataset.section;
-    render();
-  });
+function go(section, route) {
+  state.section = section;
+  if (route) state.route = route;
+  render();
+  const title = mainContent.querySelector('.page-title');
+  if (title) { title.focus({ preventScroll: true }); announce(title.textContent); }
+}
+
+document.querySelectorAll('.nav-btn').forEach((btn) => btn.addEventListener('click', () => go(btn.dataset.section)));
+
+mainContent.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const d = el.dataset;
+  switch (d.action) {
+    case 'maps':
+      showConfirm('¿Abrir el mapa?',
+        d.type === 'location' ? `Se abrirá Google Maps para ver dónde estáis. Lugar: ${d.name}.` : `Se abrirá Google Maps para ir a: ${d.name}.`,
+        'Sí, abrir el mapa', () => window.open(d.url, '_blank', 'noopener'));
+      break;
+    case 'phone':
+      showConfirm('¿Llamar por teléfono?', `Se llamará a: ${d.name}.`, 'Sí, llamar',
+        () => { window.location.href = `tel:${d.phone.replace(/\s/g, '')}`; });
+      break;
+    case 'web':
+      showConfirm('¿Abrir la página web?', `Se abrirá la web de: ${d.name}. Necesita internet.`, 'Sí, abrir',
+        () => window.open(d.url, '_blank', 'noopener'));
+      break;
+    case 'help': showHelp(d.topic); break;
+    case 'day': state.day = Number(d.day); render({ resetScroll: false }); mainContent.querySelector(`[data-day="${state.day}"]`)?.focus(); break;
+    case 'route': state.route = d.route; render(); mainContent.querySelector(`[data-route="${state.route}"]`)?.focus(); break;
+    case 'go': go(d.section, d.route); break;
+    default:
+  }
 });
 
-// PWA install prompt
+mainContent.addEventListener('change', (e) => {
+  const input = e.target.closest('input[data-time]');
+  if (!input) return;
+  setTime(input.dataset.time, input.value);
+  render({ resetScroll: false });
+  announce(input.value ? `Hora guardada: ${input.value}` : 'Hora borrada');
+  mainContent.querySelector(`input[data-time="${input.dataset.time}"]`)?.focus({ preventScroll: true });
+});
+
+/* ---------- Tamaño de letra ---------- */
+
+const SIZES = [['m', 'Letra normal'], ['l', 'Letra grande'], ['xl', 'Letra enorme']];
+
+function applyTextSize(key) {
+  const i = Math.max(0, SIZES.findIndex(([k]) => k === key));
+  document.documentElement.dataset.text = SIZES[i][0];
+  $('text-size-label').textContent = SIZES[i][1];
+  return i;
+}
+
+let sizeIndex = applyTextSize(store('madrid.text') || 'm');
+$('text-size-btn').addEventListener('click', () => {
+  sizeIndex = applyTextSize(SIZES[(sizeIndex + 1) % SIZES.length][0]);
+  store('madrid.text', SIZES[sizeIndex][0]);
+  announce(SIZES[sizeIndex][1]);
+});
+
+/* ---------- Instalar la app ---------- */
+
 let deferredPrompt = null;
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  showInstallBanner();
+  mountInstall();
 });
 
-function showInstallBanner() {
-  if (document.getElementById('install-banner')) return;
-  const banner = document.createElement('div');
-  banner.id = 'install-banner';
-  banner.className = 'install-banner';
-  banner.innerHTML = `
-    <p>📲 Instalad esta guía en el móvil para usarla sin internet</p>
-    <button class="btn" id="install-btn">Instalar en el móvil</button>
-  `;
-  mainContent.insertBefore(banner, mainContent.firstChild);
-
-  document.getElementById('install-btn').addEventListener('click', async () => {
-    if (!deferredPrompt) {
-      showHelp('app');
-      return;
-    }
+function mountInstall() {
+  const slot = $('install-slot');
+  if (!slot || !deferredPrompt) return;
+  slot.innerHTML = `
+    <div class="install-banner">
+      <p>Instalad la guía en el móvil para usarla sin internet.</p>
+      <button class="btn btn-primary" id="install-btn" type="button">Instalar en el móvil</button>
+    </div>`;
+  $('install-btn').addEventListener('click', async () => {
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
     deferredPrompt = null;
-    banner.remove();
+    slot.innerHTML = '';
   });
 }
 
+/* ---------- Inicio ---------- */
+
+const todayIndex = TRIP.days.findIndex((d) => d.date === todayIso());
+state.day = todayIndex >= 0 ? todayIndex : 0;
 render();
 
-// Register service worker via vite-plugin-pwa
-import { registerSW } from 'virtual:pwa-register';
-
-registerSW({
-  immediate: true,
-  onOfflineReady() {
-    console.log('App lista para usar sin conexión');
-  },
-});
+registerSW({ immediate: true });

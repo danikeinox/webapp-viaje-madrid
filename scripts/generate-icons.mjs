@@ -13,7 +13,7 @@ mkdirSync(iconsDir, { recursive: true });
 
 // PNG mínimo válido 1x1 rojo — fallback si no hay sharp
 function createSimplePng(size) {
-  // Generamos un PNG sólido con color #8B1A1A usando sharp si está disponible
+  // Generamos un PNG sólido con color #12263F usando sharp si está disponible
   return null;
 }
 
@@ -42,10 +42,10 @@ async function createBasicIcons() {
   const sizes = [192, 512];
   for (const size of sizes) {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 512 512">
-      <rect width="512" height="512" rx="96" fill="#8B1A1A"/>
+      <rect width="512" height="512" rx="96" fill="#12263F"/>
       <circle cx="256" cy="180" r="80" fill="#C4A35A"/>
       <rect x="176" y="260" width="160" height="120" rx="8" fill="#C4A35A"/>
-      <rect x="216" y="200" width="80" height="80" fill="#8B1A1A"/>
+      <rect x="216" y="200" width="80" height="80" fill="#12263F"/>
       <text x="256" y="430" text-anchor="middle" font-family="Arial,sans-serif" font-size="48" font-weight="bold" fill="white">Madrid</text>
     </svg>`;
     try {
