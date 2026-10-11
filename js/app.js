@@ -14,6 +14,7 @@ const state = {
   route: 'ida',
   day: 0,
   cuisine: 'todos',
+  plan: 'a',
 };
 
 /* ---------- Utilidades ---------- */
@@ -216,7 +217,11 @@ function renderHoy() {
   const tabs = TRIP.days.map((d, i) => `
     <button class="seg-btn" type="button" data-action="day" data-day="${i}" aria-pressed="${i === state.day}">${escapeHtml(d.weekday)}</button>`).join('');
 
-  const items = day.items.map((it) => `
+  const plan = day.plans ? (day.plans.find((x) => x.key === state.plan) || day.plans[0]) : null;
+  const planTabs = plan ? `<div class="segmented" role="group" aria-label="Elegir plan del día">${day.plans.map((x) => `
+    <button class="seg-btn" type="button" data-action="plan" data-plan="${x.key}" aria-pressed="${x.key === plan.key}">${escapeHtml(x.label)}<small>${escapeHtml(x.sub)}</small></button>`).join('')}</div>` : '';
+  const dayItems = plan ? [...plan.items, ...day.common] : day.items;
+  const items = dayItems.map((it) => `
     <li class="agenda-item">
       <span class="agenda-part">${escapeHtml(it.part)}</span>
       <div>
@@ -235,6 +240,8 @@ function renderHoy() {
     <div class="segmented" role="group" aria-label="Elegir día">${tabs}</div>
     <section class="panel" aria-label="Plan del ${escapeHtml(day.weekday)}">
       <h3 class="panel-title">${escapeHtml(day.weekday)}: ${escapeHtml(day.title)}</h3>
+      ${plan ? '<p class="plan-hint">Escoged el plan que más os apetezca. Solo cambia la mañana y la tarde.</p>' : ''}
+      ${planTabs}
       <ul class="agenda">${items}</ul>
     </section>
 
@@ -451,6 +458,10 @@ function renderVer() {
       <ul class="help-list">${TRIP.disability.items.map((i) => `<li><strong>${escapeHtml(i.name)}</strong>${escapeHtml(i.text)}</li>`).join('')}</ul>
     </section>
     ${TRIP.ocio.map((p) => placeCard(p)).join('')}
+    <section class="panel panel-enjoy">
+      <h3 class="panel-title">Disfrutad, sin prisas</h3>
+      <p>No hace falta verlo todo. Esta lista es para que tengáis de dónde escoger. Haced solo lo que os apetezca y descansad cuando lo necesitéis. Si os apetece pasear por la Gran Vía y nada más, ese ya es un buen plan.</p>
+    </section>
     <div class="btn-group">
       ${helpBtn('taxi', 'Cómo pedir un taxi', 'btn-taxi', 'taxi')}
       ${helpBtn('apps', 'Moverse con Bolt', 'btn-taxi', 'taxi')}
@@ -505,6 +516,7 @@ mainContent.addEventListener('click', (e) => {
       break;
     case 'help': showHelp(d.topic); break;
     case 'day': state.day = Number(d.day); render({ resetScroll: false }); mainContent.querySelector(`[data-day="${state.day}"]`)?.focus(); break;
+    case 'plan': state.plan = d.plan; render({ resetScroll: false }); mainContent.querySelector(`[data-plan="${state.plan}"]`)?.focus({ preventScroll: true }); break;
     case 'route': state.route = d.route; render(); mainContent.querySelector(`[data-route="${state.route}"]`)?.focus(); break;
     case 'go': go(d.section, d.route); break;
     default:
@@ -578,6 +590,7 @@ render();
 
 const [hashSection, hashArg] = location.hash.slice(1).split('=');
 if (hashSection === 'comer' && hashArg) state.cuisine = hashArg;
+if (hashSection === 'hoy' && hashArg) state.day = Number(hashArg);
 if (RENDERERS[hashSection]) { state.section = hashSection; render(); }
 if (location.hash.startsWith('#ayuda-')) showHelp(location.hash.slice(7));
 

@@ -436,11 +436,30 @@ export const TRIP = {
       label: 'Mié 14',
       weekday: 'Miércoles 14',
       title: 'Día completo en Madrid',
-      items: [
-        { part: 'Mañana', text: 'Museo del Prado, abre a las 10:00. Calculad unas 2 horas.', go: { section: 'ver' }, goLabel: 'Ver lugares' },
-        { part: 'Mediodía', text: 'Comida tranquila. Reservad con antelación si queréis un restaurante concreto.', go: { section: 'comer' }, goLabel: 'Ver dónde comer' },
-        { part: 'Tarde', text: 'Paseo por el Retiro, que está al lado del Prado: el Estanque Grande y el Palacio de Cristal. Unas 2 horas, con paradas en los bancos. Luego volved al hostal a cambiaros.', go: { section: 'ver' }, goLabel: 'Ver el Retiro' },
-        { part: '18:15', text: 'Las puertas abren a las 18:15. Id al Teatro Lope de Vega (Gran Vía, 57), a unos 15 minutos andando del hostal, y estad allí sobre esa hora. Llevad las entradas abiertas en WhatsApp.', go: { section: 'ver' }, goLabel: 'Ver el teatro' },
+      plans: [
+        {
+          key: 'a',
+          label: 'Plan A',
+          sub: 'Prado y Retiro',
+          items: [
+            { part: 'Mañana', text: 'Museo del Prado, abre a las 10:00. Calculad unas 2 horas. Papá entra gratis con su tarjeta.', go: { section: 'ver' }, goLabel: 'Ver lugares' },
+            { part: 'Mediodía', text: 'Comida tranquila. Reservad con antelación si queréis un restaurante concreto.', go: { section: 'comer' }, goLabel: 'Ver dónde comer' },
+            { part: 'Tarde', text: 'Paseo por el Retiro, que está al lado del Prado: el Estanque Grande y el Palacio de Cristal. Unas 2 horas, con paradas en los bancos.', go: { section: 'ver' }, goLabel: 'Ver el Retiro' },
+          ],
+        },
+        {
+          key: 'b',
+          label: 'Plan B',
+          sub: 'Museos con calma',
+          items: [
+            { part: 'Mañana', text: 'Museo Reina Sofía, con el Guernica de Picasso. Mirad en su web a qué hora abre el miércoles.', go: { section: 'ver' }, goLabel: 'Ver lugares' },
+            { part: 'Mediodía', text: 'Comed algo por el barrio de Atocha o volved hacia el centro. Mirad los tipos de comida para escoger.', go: { section: 'comer' }, goLabel: 'Ver dónde comer' },
+            { part: 'Tarde', text: 'Museo Thyssen-Bornemisza, en el Paseo del Prado. Es más pequeño y tranquilo, así que se hace en un par de horas. Después, un paseo por Cibeles y la calle de Alcalá.', go: { section: 'ver' }, goLabel: 'Ver lugares' },
+          ],
+        },
+      ],
+      common: [
+        { part: '18:15', text: 'Las puertas del teatro abren a las 18:15. Id al Teatro Lope de Vega (Gran Vía, 57), a unos 15 minutos andando del hostal, y estad allí sobre esa hora. Llevad las entradas abiertas en WhatsApp.', go: { section: 'ver' }, goLabel: 'Ver el teatro' },
         { part: '19:00', text: 'El Rey León. Anfiteatro, fila 1, asientos 1 y 2. Para volver al hostal de noche, pedid un Bolt (7 a 15 € aprox.).', go: { section: 'hoy', help: 'apps' }, goLabel: 'Cómo usar Bolt' },
       ],
     },
@@ -450,7 +469,8 @@ export const TRIP = {
       weekday: 'Jueves 15',
       title: 'Vuelta a casa',
       items: [
-        { part: 'Mañana', text: 'Desayuno, preparar las maletas y dejar la habitación antes de las 11:00.', go: { section: 'hostal' }, goLabel: 'Ver el hostal' },
+        { part: 'Mañana', text: 'Desayuno, preparar las maletas y dejar la habitación antes de las 11:00. Las maletas se pueden dejar en recepción.', go: { section: 'hostal' }, goLabel: 'Ver el hostal' },
+        { part: 'Mediodía', text: 'Tenéis tiempo para un último paseo sin prisas, por ejemplo por la Plaza Mayor, o por los Jardines de Sabatini y la Almudena. O descansad tranquilos en la cafetería.', go: { section: 'ver' }, goLabel: 'Ver lugares' },
         { part: 'Después', text: 'Tren AVE a las 16:22 en Madrid Puerta de Atocha, llegada a Sants a las 19:24.', go: { section: 'trayecto', route: 'vuelta' }, goLabel: 'Ver el trayecto de vuelta' },
         { part: 'Tarde', text: 'Bus de Sants a Vilafranca a las 20:45 y llegada a casa.' },
       ],
