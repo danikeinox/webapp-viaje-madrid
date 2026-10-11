@@ -165,9 +165,19 @@ export const TRIP = {
     },
   },
 
+  cuisines: [
+    { key: 'tapas', label: 'Tapas y tabernas' },
+    { key: 'arroces', label: 'Arroces y paella' },
+    { key: 'carnes', label: 'Carnes y asados' },
+    { key: 'tradicional', label: 'Cocina tradicional' },
+    { key: 'cafe', label: 'Café y desayuno' },
+    { key: 'rapido', label: 'Rápido y barato' },
+  ],
+
   restaurants: [
     {
       name: 'Casa Labra',
+      cuisines: ['tapas', 'rapido'],
       type: 'Taberna histórica, cerca del hostal',
       description: 'A 5 minutos andando. Famosa por el bacalao frito y las croquetas. Se come de pie en la barra: rápido y barato.',
       address: 'Calle de Tetuán, 12',
@@ -179,6 +189,7 @@ export const TRIP = {
     },
     {
       name: 'La Barraca',
+      cuisines: ['arroces'],
       type: 'Paella y arroces',
       description: 'Arroces en pleno centro. Opción cómoda para sentarse con calma.',
       address: 'Calle de la Reina, 29',
@@ -190,6 +201,7 @@ export const TRIP = {
     },
     {
       name: 'Sobrino de Botín',
+      cuisines: ['carnes', 'tradicional'],
       type: 'Restaurante histórico (desde 1725)',
       description: 'Cochinillo y cordero asado al horno de leña. Es caro; ideal para una comida especial.',
       address: 'Calle de los Cuchilleros, 17',
@@ -201,6 +213,7 @@ export const TRIP = {
     },
     {
       name: 'Casa Lucio',
+      cuisines: ['tradicional'],
       type: 'Cocina castellana',
       description: 'Famoso por los huevos estrellados. Está en la Cava Baja.',
       address: 'Calle de la Cava Baja, 35',
@@ -213,6 +226,7 @@ export const TRIP = {
     },
     {
       name: 'Café de Oriente',
+      cuisines: ['cafe'],
       type: 'Café y restaurante con vistas',
       description: 'Frente al Palacio Real. Bueno para un café o una comida tranquila después de la visita.',
       address: 'Plaza de Oriente, 2',
@@ -224,6 +238,7 @@ export const TRIP = {
     },
     {
       name: 'Rodilla',
+      cuisines: ['rapido', 'cafe'],
       type: 'Bocadillos',
       description: 'Cadena madrileña de bocadillos y sándwiches. Rápido y económico, sin reserva. Hay varios locales por el centro.',
       address: 'Varios locales en el centro',

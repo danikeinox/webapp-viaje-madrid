@@ -301,3 +301,17 @@ button, input { font: inherit; color: inherit; }
 .howto span { display: block; font-size: 1rem; line-height: 1.45; color: var(--ink-soft); }
 .howto b { color: var(--ink); background: var(--signal); padding: 0 6px; border-radius: 6px; }
 .modal-title:focus{outline:none}
+
+/* ---------- Filtro por tipo de comida ---------- */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.chip {
+  min-height: 52px; padding: 8px 16px; border: 2px solid var(--ink); border-radius: 26px;
+  background: var(--card); font-weight: 700; font-size: 0.95rem; cursor: pointer; touch-action: manipulation;
+}
+.chip[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.chips-count { color: var(--ink-soft); font-size: 0.9rem; margin: 4px 2px 14px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; }
+.tag { background: var(--info-bg); color: var(--ink); border-radius: 14px; padding: 2px 10px; font-size: 0.8rem; font-weight: 700; }
+.chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.chip { border-radius: var(--radius-btn); min-height: 56px; padding: 6px 10px; font-size: 0.9rem; line-height: 1.2; }
+.chip[data-cuisine="todos"] { grid-column: 1 / -1; }

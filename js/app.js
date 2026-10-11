@@ -13,6 +13,7 @@ const state = {
   section: 'hoy',
   route: 'ida',
   day: 0,
+  cuisine: 'todos',
 };
 
 /* ---------- Utilidades ---------- */
@@ -394,6 +395,7 @@ function placeCard(p, extra = '') {
     <section class="panel">
       <p class="place-type">${escapeHtml(p.type)}</p>
       <h3 class="panel-title">${escapeHtml(p.name)}</h3>
+      ${p.cuisines ? `<p class="tags">${p.cuisines.map((k) => `<span class="tag">${escapeHtml(TRIP.cuisines.find((c) => c.key === k).label)}</span>`).join('')}</p>` : ''}
       <p>${escapeHtml(p.description)}</p>
       ${facts([['Dirección', p.address], ['Horario', p.hours], ['Vuestro sitio', p.seats], ['Precio', p.price], ['Teléfono', p.phone ? p.phone.replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') : '']])}
       ${p.warning ? warn(p.warning) : ''}
@@ -410,10 +412,18 @@ function placeCard(p, extra = '') {
 
 function renderComer() {
   const reserveNote = (r) => (r.reserve ? note('Conviene reservar con antelación.') : note('No hace falta reservar.'));
+  const used = TRIP.cuisines.filter((c) => TRIP.restaurants.some((r) => r.cuisines.includes(c.key)));
+  const chips = [{ key: 'todos', label: 'Todos' }, ...used].map((c) => `
+    <button class="chip" type="button" data-action="cuisine" data-cuisine="${c.key}" aria-pressed="${state.cuisine === c.key}">${escapeHtml(c.label)}</button>`).join('');
+  const list = TRIP.restaurants.filter((r) => state.cuisine === 'todos' || r.cuisines.includes(state.cuisine));
+  const current = used.find((c) => c.key === state.cuisine);
+  const count = list.length === 1 ? '1 sitio' : `${list.length} sitios`;
   return `
     <h2 class="page-title" tabindex="-1">Dónde comer</h2>
-    <p class="page-intro">Sitios de confianza cerca del centro. Pulsad "Llamar" solo si queréis reservar.</p>
-    ${TRIP.restaurants.map((r) => placeCard(r, reserveNote(r))).join('')}
+    <p class="page-intro">Sitios de confianza cerca del centro. Si queréis, escoged un tipo de comida. Pulsad "Llamar" solo si queréis reservar.</p>
+    <div class="chips" role="group" aria-label="Tipo de comida">${chips}</div>
+    <p class="chips-count" role="status">${current ? `${escapeHtml(current.label)}: ${count}` : `Todos los tipos: ${count}`}</p>
+    ${list.map((r) => placeCard(r, reserveNote(r))).join('')}
     <div class="btn-group">${helpBtn('maps', 'Cómo usar Google Maps', 'btn-outline', 'pin')}</div>`;
 }
 
@@ -476,6 +486,7 @@ mainContent.addEventListener('click', (e) => {
       break;
     case 'help': showHelp(d.topic); break;
     case 'day': state.day = Number(d.day); render({ resetScroll: false }); mainContent.querySelector(`[data-day="${state.day}"]`)?.focus(); break;
+    case 'cuisine': state.cuisine = d.cuisine; render({ resetScroll: false }); mainContent.querySelector(`[data-cuisine="${state.cuisine}"]`)?.focus({ preventScroll: true }); break;
     case 'route': state.route = d.route; render(); mainContent.querySelector(`[data-route="${state.route}"]`)?.focus(); break;
     case 'go': go(d.section, d.route); break;
     default:
@@ -541,6 +552,8 @@ const todayIndex = TRIP.days.findIndex((d) => d.date === todayIso());
 state.day = todayIndex >= 0 ? todayIndex : 0;
 render();
 
+const hashSection = location.hash.slice(1);
+if (RENDERERS[hashSection]) { state.section = hashSection; render(); }
 if (location.hash.startsWith('#ayuda-')) showHelp(location.hash.slice(7));
 
 registerSW({ immediate: true });
