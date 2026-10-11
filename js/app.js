@@ -93,7 +93,8 @@ function openDialog(overlay, focusEl) {
   lastFocus = document.activeElement;
   openOverlay = overlay;
   overlay.hidden = false;
-  focusEl.focus();
+  overlay.scrollTop = 0;
+  focusEl.focus({ preventScroll: true });
 }
 
 function closeDialog() {
@@ -117,7 +118,7 @@ function showHelp(topicKey) {
   if (!topic) return;
   $('help-title').textContent = topic.title;
   $('help-content').innerHTML = topic.content;
-  openDialog(helpOverlay, $('help-close'));
+  openDialog(helpOverlay, $('help-title'));
 }
 
 $('modal-confirm').addEventListener('click', () => {
@@ -539,5 +540,7 @@ function mountInstall() {
 const todayIndex = TRIP.days.findIndex((d) => d.date === todayIso());
 state.day = todayIndex >= 0 ? todayIndex : 0;
 render();
+
+if (location.hash.startsWith('#ayuda-')) showHelp(location.hash.slice(7));
 
 registerSW({ immediate: true });

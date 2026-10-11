@@ -88,10 +88,10 @@ export const TRIP = {
         },
         {
           title: 'Bus de Vilafranca a Barcelona Sants',
-          text: 'Id a la estación de autobuses de Vilafranca y coged el bus hacia Barcelona Sants.',
+          text: 'Id a la estación de autobuses de Vilafranca. El bus os deja en Sants, junto a la estación de trenes.',
           time: 'busVilafranca',
           map: 'busVilafranca',
-          tip: 'Mirad en vuestro billete la parada exacta de Barcelona donde baja el bus.',
+          facts: [['Precio', '6,90 € por persona'], ['Cómo se paga', 'En efectivo, en el propio bus'], ['Llevad', 'Unos 14 € en efectivo para los dos']],
         },
         {
           title: 'De la estación de buses a la de trenes',
@@ -150,9 +150,10 @@ export const TRIP = {
         },
         {
           title: 'Bus de Barcelona a Vilafranca',
-          text: 'Coged el bus con destino Vilafranca del Penedès. Hay otro a las 19:35, pero el tren llega a las 19:24 y no da tiempo: es mejor el de las 20:45 y así vais sin prisas. Podéis cenar algo en Sants mientras esperáis.',
+          text: 'Coged el bus con destino Vilafranca del Penedès. Sale de Sants y os deja en Vilafranca. Hay otro a las 19:35, pero el tren llega a las 19:24 y no da tiempo: es mejor el de las 20:45 y así vais sin prisas. Podéis cenar algo en Sants mientras esperáis.',
           time: 'busSantsVilafranca',
-          tip: 'Guardad el billete hasta llegar.',
+          facts: [['Precio', '6,90 € por persona'], ['Cómo se paga', 'En efectivo, en el propio bus'], ['Llevad', 'Unos 14 € en efectivo para los dos']],
+          tip: 'Si os resulta más cómodo, también podéis volver a Vilafranca en tren. No pasa nada.',
           taxiBarcelona: true,
         },
         {
@@ -382,15 +383,18 @@ export const HELP_TOPICS = {
       </ul>`,
   },
   apps: {
-    title: 'Moverse con Bolt, Uber o Cabify',
+    title: 'Moverse con Bolt',
     content: `
-      <ul class="help-list">
-        <li><strong>Para qué sirve</strong>Es la forma más fácil de moverse por Madrid, sobre todo por la noche, al volver del teatro o al ir a cenar. Un viaje por el centro cuesta aproximadamente de 7 a 15 €. Tenéis Bolt instalado.</li>
-        <li><strong>1. Antes de subir</strong>Cuando llegue el coche, mirad en la app la <strong>matrícula</strong> y el <strong>modelo</strong> del coche. Tienen que ser los mismos que ve el móvil.</li>
-        <li><strong>2. Abrid la puerta de atrás</strong>Preguntad al conductor a nombre de quién es el viaje. Él os dirá el nombre de quien lo ha reservado: <strong>Juan</strong>.</li>
-        <li><strong>3. Subid</strong>Si dice "Juan", sentaos atrás. Si no coincide la matrícula, el modelo o el nombre, no subáis y cancelad desde la app.</li>
-        <li><strong>4. El destino</strong>Os llevará al lugar indicado. Si el coche no puede llegar hasta la puerta (calle peatonal o cortada), os dejará lo más cerca posible.</li>
-      </ul>`,
+      <p class="help-lead">Es la forma más cómoda de moverse por Madrid, sobre todo de noche: al volver del teatro o al ir a cenar. También sirven Uber y Cabify.</p>
+      <p class="help-cost"><span class="help-cost-num">7 a 15 €</span> cuesta más o menos un viaje por el centro. Tenéis Bolt instalado.</p>
+      <ol class="howto">
+        <li><strong>Pedid el coche</strong><span>Escribid el sitio al que vais y pulsad pedir. Veréis en el mapa cómo llega.</span></li>
+        <li><strong>Mirad matrícula y modelo</strong><span>Cuando llegue, comprobad que la matrícula y el modelo son los mismos que salen en la app.</span></li>
+        <li><strong>Abrid la puerta de atrás y preguntad</strong><span>Decid: "¿A nombre de quién es el viaje?". El conductor tiene que contestar <b>Juan</b>.</span></li>
+        <li><strong>Subid y sentaos atrás</strong><span>Os lleva a la dirección indicada. Si el coche no puede llegar hasta la puerta, os deja lo más cerca posible.</span></li>
+      </ol>
+      <div class="warn"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg><span>Si la matrícula, el modelo o el nombre no coinciden, no subáis. Cancelad el viaje desde la app.</span></div>
+    `,
   },
   maps: {
     title: 'Cómo usar Google Maps',
