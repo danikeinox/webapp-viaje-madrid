@@ -400,7 +400,7 @@ function placeCard(p, extra = '') {
       <h3 class="panel-title">${escapeHtml(p.name)}</h3>
       ${p.cuisines ? `<p class="tags">${p.cuisines.map((k) => `<span class="tag">${escapeHtml(TRIP.cuisines.find((c) => c.key === k).label)}</span>`).join('')}</p>` : ''}
       <p>${escapeHtml(p.description)}</p>
-      ${facts([['Dirección', p.address], ['Horario', p.hours], ['Vuestro sitio', p.seats], ['Precio', p.price], ['Teléfono', p.phone ? p.phone.replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') : '']])}
+      ${facts([['Dirección', p.address], ['Horario', p.hours], ['Vuestro sitio', p.seats], ['Precio', p.price], ['Tarjeta de discapacidad', p.disability], ['Teléfono', p.phone ? p.phone.replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') : '']])}
       ${p.warning ? warn(p.warning) : ''}
       ${p.tips ? note(p.tips) : ''}
       ${extra}
@@ -445,6 +445,11 @@ function renderVer() {
   return `
     <h2 class="page-title" tabindex="-1">Qué ver</h2>
     <p class="page-intro">Lugares para pasear o visitar con calma. Los horarios son los de entre semana.</p>
+    <section class="panel panel-search">
+      <h3 class="panel-title">Con la tarjeta de discapacidad</h3>
+      <p>${escapeHtml(TRIP.disability.intro)}</p>
+      <ul class="help-list">${TRIP.disability.items.map((i) => `<li><strong>${escapeHtml(i.name)}</strong>${escapeHtml(i.text)}</li>`).join('')}</ul>
+    </section>
     ${TRIP.ocio.map((p) => placeCard(p)).join('')}
     <div class="btn-group">
       ${helpBtn('taxi', 'Cómo pedir un taxi', 'btn-taxi', 'taxi')}

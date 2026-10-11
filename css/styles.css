@@ -197,7 +197,7 @@ button, input { font: inherit; color: inherit; }
 /* ---------- Datos de un lugar ---------- */
 .place-type { font-size: 0.85rem; font-weight: 700; color: var(--crimson); margin-bottom: 2px; }
 .facts { margin: 10px 0; }
-.facts div { display: grid; grid-template-columns: 5.5rem 1fr; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 0.95rem; }
+.facts div { display: grid; grid-template-columns: 6.5rem 1fr; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 0.95rem; }
 .facts dt { font-weight: 700; }
 .facts dd { min-width: 0; overflow-wrap: anywhere; }
 .verify { font-size: 0.8rem; color: var(--ink-soft); margin-top: 8px; }
