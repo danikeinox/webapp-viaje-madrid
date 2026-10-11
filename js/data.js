@@ -292,7 +292,7 @@ export const TRIP = {
       phone: '',
       hours: 'Lunes a sábado de 10:00 a 20:00',
       price: 'Entrada general de pago. Gratis de 18:00 a 20:00, pero hay cola.',
-      disability: 'El padre entra gratis (33 %). Se pide en taquilla con la tarjeta y el DNI. La madre paga entrada.',
+      disability: 'Papá, entras gratis con tu tarjeta de discapacidad y el DNI: pídelo en la taquilla. Mamá, pagas entrada normal.',
       mapsUrl: maps('Museo del Prado Madrid'),
       web: 'https://www.museodelprado.es/',
       tips: 'Llevad el DNI y la tarjeta de discapacidad. Pasar la mañana aquí y comer después es un buen plan.',
@@ -318,7 +318,7 @@ export const TRIP = {
       phone: '',
       hours: 'Lunes a sábado de 10:00 a 18:00',
       price: 'Entrada general 18 €.',
-      disability: 'El padre entra gratis, según varias guías. Llevad la tarjeta y el DNI. La madre paga entrada.',
+      disability: 'Papá, según varias guías entras gratis con tu tarjeta y el DNI. Mamá, pagas entrada normal.',
       mapsUrl: maps('Palacio Real Madrid'),
       web: 'https://tickets.patrimonionacional.es/',
       tips: 'Puede cerrar por actos oficiales: mirad la web antes de ir. Comprar la entrada online evita colas.',
@@ -401,11 +401,11 @@ export const TRIP = {
 
   // Tarjeta de discapacidad (el padre). Los padres no son mayores de 65, así que no hay descuentos por edad.
   disability: {
-    intro: 'Llevad siempre la tarjeta de discapacidad (33 %) y los DNI. La tarjeta no indica acompañante, así que la gratuidad es solo para el padre y la madre paga entrada. Los datos vienen de guías; confirmadlo en la taquilla.',
+    intro: 'Papá, lleva siempre tu tarjeta de discapacidad, y llevad los dos el DNI. Como la tarjeta no indica acompañante, la entrada gratis es solo para ti, papá, y mamá paga entrada. Estos datos vienen de guías: confirmadlo en la taquilla.',
     items: [
-      { name: 'Museo del Prado', text: 'El padre entra gratis con la tarjeta y el DNI. Pedid su entrada en la taquilla. La madre paga entrada normal.' },
-      { name: 'Palacio Real', text: 'Varias guías dicen que la entrada es gratis para personas con discapacidad. Para el padre, confirmadlo en la taquilla o en la web. La madre paga entrada.' },
-      { name: 'Reina Sofía y Thyssen', text: 'Si os apetece otro museo: el padre entra gratis con discapacidad del 33 % o más. La madre paga, porque la tarjeta no indica acompañante.' },
+      { name: 'Museo del Prado', text: 'Papá, entras gratis con tu tarjeta y el DNI. Pide tu entrada en la taquilla. Mamá, pagas entrada normal.' },
+      { name: 'Palacio Real', text: 'Varias guías dicen que las personas con discapacidad entran gratis. Papá, confírmalo en la taquilla o en la web. Mamá, pagas entrada normal.' },
+      { name: 'Reina Sofía y Thyssen', text: 'Si os apetece otro museo: papá, entras gratis con tu discapacidad del 33 %. Mamá, pagas, porque la tarjeta no indica acompañante.' },
       { name: 'Templo de Debod, Retiro y paseos', text: 'Ya son gratis para todo el mundo. No hace falta tarjeta.' },
       { name: 'Teatro y trenes', text: 'Las entradas y los billetes ya están comprados. Si en el teatro hace falta ayuda para entrar o sentarse, preguntad al personal de la puerta.' },
     ],
