@@ -407,12 +407,14 @@ export const HELP_TOPICS = {
   metro: {
     title: 'De Atocha al hostal en metro',
     content: `
-      <ul class="help-list">
-        <li><strong>Línea 1 (azul claro)</strong>Estación Atocha Renfe, dirección Pinar de Chamartín. Bajad en <strong>Sol</strong>.</li>
-        <li><strong>De Sol al hostal</strong>Salid a la Puerta del Sol y andad unos 5 minutos hasta la calle Esparteros, 6. Abrid el mapa para que os guíe.</li>
-        <li><strong>Billete</strong>Se compra en las máquinas de la estación. Un viaje sencillo cuesta unos 1,50 a 2 €.</li>
-        <li><strong>Con maletas</strong>Si hay muchas escaleras o vais cansados, el taxi es más cómodo.</li>
-      </ul>`,
+      <p class="help-lead">Son unos 10 minutos de metro y 5 andando. Con maletas o cansados, el taxi es más cómodo.</p>
+      <ol class="howto">
+        <li><strong>Coged la línea 1 (azul claro)</strong><span>En la estación Atocha Renfe, dirección Pinar de Chamartín.</span></li>
+        <li><strong>Bajad en Sol</strong><span>Es una parada muy grande y con muchas salidas. Seguid las señales a Puerta del Sol.</span></li>
+        <li><strong>Andad hasta el hostal</strong><span>Unos 5 minutos hasta la calle Esparteros, 6. Abrid el mapa para que os guíe.</span></li>
+      </ol>
+      <div class="note"><svg class="i" aria-hidden="true"><use href="#i-bulb"/></svg><span>El billete sencillo se compra en las máquinas de la estación y cuesta unos 1,50 a 2 €.</span></div>
+    `,
   },
   apps: {
     title: 'Moverse con Bolt',
