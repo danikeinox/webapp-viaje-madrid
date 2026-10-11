@@ -281,7 +281,7 @@ export const TRIP = {
       hours: 'Miércoles 14, función a las 19:00 (puertas a las 18:15)',
       seats: 'Anfiteatro, fila 1, asientos 1 y 2',
       mapsUrl: maps('Teatro Lope de Vega Gran Vía 57 Madrid'),
-      tips: 'Para volver al hostal de noche, lo más cómodo es pedir un Bolt (7 a 15 € aprox.). Las entradas están guardadas en WhatsApp. Abridlas en el móvil antes de llegar a la puerta y enseñadlas al entrar. Las puertas abren a las 18:15, 45 minutos antes de la función. Lo mejor es estar allí sobre esa hora, antes de que empiece.',
+      tips: 'Por la noche refresca: llevad chaqueta. Para volver al hostal de noche, lo más cómodo es pedir un Bolt (7 a 15 € aprox.). Las entradas están guardadas en WhatsApp. Abridlas en el móvil antes de llegar a la puerta y enseñadlas al entrar. Las puertas abren a las 18:15, 45 minutos antes de la función. Lo mejor es estar allí sobre esa hora, antes de que empiece.',
       verify: true,
     },
     {

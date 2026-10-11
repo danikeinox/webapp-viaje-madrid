@@ -246,6 +246,7 @@ function renderHoy() {
 
     <h3 class="group-title">El tiempo en Madrid</h3>
     <div id="weather-box"><p class="weather-note">Cargando previsión…</p></div>
+    ${note('Por la noche refresca, aunque de día haga calor. Llevad una chaqueta o un jersey en la mochila, sobre todo para la cena, el teatro y la vuelta al hostal.')}
 
     <h3 class="group-title">Ayuda rápida</h3>
     <div class="quick">
