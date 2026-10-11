@@ -165,13 +165,30 @@ export const TRIP = {
     },
   },
 
+  // `search` es lo que se busca en Google Maps cerca del hostal. Los tipos sin restaurantes
+  // propios (abajo) muestran solo ese botón de búsqueda. Añade restaurantes a `restaurants`
+  // con `cuisines: ['clave']` para que salgan en la lista.
   cuisines: [
-    { key: 'tapas', label: 'Tapas y tabernas' },
-    { key: 'arroces', label: 'Arroces y paella' },
-    { key: 'carnes', label: 'Carnes y asados' },
-    { key: 'tradicional', label: 'Cocina tradicional' },
-    { key: 'cafe', label: 'Café y desayuno' },
-    { key: 'rapido', label: 'Rápido y barato' },
+    { key: 'tapas', label: 'Tapas y tabernas', search: 'tapas' },
+    { key: 'tradicional', label: 'Cocina tradicional española', search: 'restaurante cocina tradicional española' },
+    { key: 'cocido', label: 'Cocido madrileño', search: 'cocido madrileño' },
+    { key: 'calamares', label: 'Bocadillo de calamares', search: 'bocadillo de calamares' },
+    { key: 'arroces', label: 'Arroces y paella', search: 'restaurante paella arroces' },
+    { key: 'carnes', label: 'Carnes y asados', search: 'asador carnes' },
+    { key: 'marisco', label: 'Pescado y marisco', search: 'restaurante pescado marisco' },
+    { key: 'menu', label: 'Menú del día', search: 'menú del día' },
+    { key: 'cafe', label: 'Café y desayuno', search: 'cafetería desayuno' },
+    { key: 'churros', label: 'Churros con chocolate', search: 'churros con chocolate' },
+    { key: 'postres', label: 'Helados y pastelería', search: 'pastelería heladería' },
+    { key: 'rapido', label: 'Rápido y barato', search: 'bocadillos baratos' },
+    { key: 'pizza', label: 'Pizza e italiana', search: 'restaurante italiano pizza' },
+    { key: 'hamburguesa', label: 'Hamburguesas', search: 'hamburguesería' },
+    { key: 'ramen', label: 'Ramen y comida japonesa', search: 'ramen' },
+    { key: 'kebab', label: 'Kebab', search: 'kebab' },
+    { key: 'china', label: 'Comida china', search: 'restaurante chino' },
+    { key: 'india', label: 'Comida india', search: 'restaurante indio' },
+    { key: 'mexicana', label: 'Comida mexicana', search: 'restaurante mexicano' },
+    { key: 'vegetariana', label: 'Vegetariana', search: 'restaurante vegetariano' },
   ],
 
   restaurants: [

@@ -315,3 +315,14 @@ button, input { font: inherit; color: inherit; }
 .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .chip { border-radius: var(--radius-btn); min-height: 56px; padding: 6px 10px; font-size: 0.9rem; line-height: 1.2; }
 .chip[data-cuisine="todos"] { grid-column: 1 / -1; }
+
+/* ---------- Selector de tipo de comida ---------- */
+.select-label { display: block; font-weight: 700; margin-bottom: 6px; }
+.select {
+  width: 100%; min-height: 60px; padding: 10px 44px 10px 14px; font-size: 1.05rem; font-weight: 700;
+  border: 3px solid var(--ink); border-radius: var(--radius-btn); background-color: var(--card); color: var(--ink);
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2312263F' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 9l7 7 7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; background-size: 24px;
+}
+.panel-search { border-color: var(--blue); background: var(--info-bg); }
