@@ -422,10 +422,10 @@ export const HELP_TOPICS = {
       <ol class="howto">
         <li><strong>Pedid el coche</strong><span>Escribid el sitio al que vais y pulsad pedir. Veréis en el mapa cómo llega.</span></li>
         <li><strong>Mirad matrícula y modelo</strong><span>Cuando llegue, comprobad que la matrícula y el modelo son los mismos que salen en la app.</span></li>
-        <li><strong>Abrid la puerta de atrás y preguntad</strong><span>Decid: "¿A nombre de quién es el viaje?". El conductor tiene que contestar <b>Juan</b>.</span></li>
+        <li><strong>Abrid la puerta de atrás y preguntad por el conductor</strong><span>En la app sale el nombre del conductor. Decidle ese nombre: "¿Eres [nombre]?". Él confirmará y os dirá a nombre de quién es el viaje: <b>Juan</b>.</span></li>
         <li><strong>Subid y sentaos atrás</strong><span>Os lleva a la dirección indicada. Si el coche no puede llegar hasta la puerta, os deja lo más cerca posible.</span></li>
       </ol>
-      <div class="warn"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg><span>Si la matrícula, el modelo o el nombre no coinciden, no subáis. Cancelad el viaje desde la app.</span></div>
+      <div class="warn"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg><span>Si la matrícula o el modelo no coinciden, o el conductor no dice Juan, no subáis. Cancelad el viaje desde la app.</span></div>
     `,
   },
   maps: {
