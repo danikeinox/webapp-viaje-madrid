@@ -292,26 +292,52 @@ function weatherHtml(data, savedAt, offline) {
   return `<div class="weather">${cols}</div><p class="weather-note">${escapeHtml(msg)} Máxima / mínima.</p>`;
 }
 
-async function loadWeather() {
+// La previsión se renueva una vez al día, a partir de las 8:00. Una web no puede despertarse
+// sola con la app cerrada, así que se renueva al abrirla (o volver a ella) o en cuanto hay internet.
+const WEATHER_HOUR = 8;
+let weatherFetching = false;
+
+function latestRefreshPoint() {
+  const d = new Date();
+  d.setHours(WEATHER_HOUR, 0, 0, 0);
+  if (d > new Date()) d.setDate(d.getDate() - 1);
+  return d.getTime();
+}
+
+function paintWeather(offline) {
   const box = $('weather-box');
-  if (!box) return;
   const cached = store('madrid.weather');
-  if (cached) box.innerHTML = weatherHtml(cached.data, cached.savedAt, true);
+  if (!box || !cached) return;
+  box.innerHTML = weatherHtml(cached.data, cached.savedAt, offline);
+}
+
+async function refreshWeather() {
+  const cached = store('madrid.weather');
+  if (cached && cached.savedAt >= latestRefreshPoint()) { paintWeather(false); return; }
+  if (cached) paintWeather(!navigator.onLine);
+  if (weatherFetching) return;
+  weatherFetching = true;
   try {
     const { lat, lon } = TRIP.weather;
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Europe%2FMadrid&start_date=${TRIP.start}&end_date=${TRIP.end}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error('bad status');
     const json = await res.json();
-    const entry = { data: json.daily, savedAt: Date.now() };
-    store('madrid.weather', entry);
-    const live = $('weather-box');
-    if (live) live.innerHTML = weatherHtml(entry.data, entry.savedAt, false);
+    store('madrid.weather', { data: json.daily, savedAt: Date.now() });
+    paintWeather(false);
   } catch {
-    const live = $('weather-box');
-    if (live && !cached) live.innerHTML = '<p class="weather-note">La previsión se verá cuando tengáis internet. Mirad el cielo y llevad un paraguas pequeño por si acaso.</p>';
+    if (cached) paintWeather(true);
+    const box = $('weather-box');
+    if (box && !cached) box.innerHTML = '<p class="weather-note">La previsión se verá cuando tengáis internet. Mirad el cielo y llevad un paraguas pequeño por si acaso.</p>';
+  } finally {
+    weatherFetching = false;
   }
 }
+
+const loadWeather = refreshWeather;
+window.addEventListener('online', refreshWeather);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshWeather(); });
+setInterval(refreshWeather, 30 * 60 * 1000);
 
 /* ---------- Pantalla: Trayecto ---------- */
 
