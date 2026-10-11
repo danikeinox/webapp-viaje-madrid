@@ -321,6 +321,7 @@ function renderStep(step) {
     btns.push(mapsBtn(TRIP.hotel.name, TRIP.hotel.mapsUrl));
     btns.push(phoneBtn(TRIP.hotel.name, TRIP.hotel.phone, 'Llamar al hostal'));
   }
+  if (step.go) btns.push(`<button class="btn btn-outline" type="button" data-action="go" data-section="${step.go.section}">${icon('arrow')}<span>${escapeHtml(step.go.label)}</span></button>`);
   if (step.taxi) btns.push(helpBtn('taxi', 'Cómo pedir un taxi', 'btn-taxi', 'taxi'));
   (step.help || []).forEach(([topic, label]) => btns.push(helpBtn(topic, label, 'btn-outline', 'train')));
   if (step.taxiBarcelona) btns.push(phoneBtn(TRIP.taxis.barcelona[0].name, TRIP.taxis.barcelona[0].phone, 'Llamar a un taxi en Barcelona'));
